@@ -153,7 +153,7 @@ export default function Header() {
         {/* Right CTA Button */}
         <div className="hidden lg:flex items-center shrink-0">
           <Link
-            href="/#planner"
+            href="/contact"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-700 to-cyan-600 hover:from-sky-800 hover:to-cyan-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-md shadow-sky-900/10 hover:shadow-lg hover:shadow-sky-900/20 transition-all transform active:scale-95"
           >
             <PhoneCall className="w-4 h-4 text-sky-100" />
@@ -191,7 +191,7 @@ export default function Header() {
             ))}
             <div className="pt-3 mt-2 border-t border-slate-100 flex flex-col gap-3">
               <Link
-                href="/#planner"
+                href="/contact"
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full text-center bg-sky-700 hover:bg-sky-800 text-white font-semibold py-3 rounded-xl shadow-md transition-colors"
               >

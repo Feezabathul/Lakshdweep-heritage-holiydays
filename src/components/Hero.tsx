@@ -59,7 +59,7 @@ export default function Hero() {
             <ArrowRight className="w-5 h-5" />
           </Link>
           <Link
-            href="/#planner"
+            href="/contact"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 text-white font-semibold px-8 py-4 rounded-full text-base transition-all hover:-translate-y-0.5"
           >
             <span>Plan Your Trip</span>

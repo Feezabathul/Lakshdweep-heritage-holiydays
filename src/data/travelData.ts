@@ -125,7 +125,7 @@ export const PACKAGES_DATA: Package[] = [
     category: "Family Special",
     duration: "3 Nights / 4 Days",
     startingPrice: "₹13,399",
-    image: "/images/kavaratti_island.jpg",
+    image: "/images/family_island_holiday.jpg",
     description: "Safe, fun-filled family vacation with shallow lagoon activities.",
     highlights: [],
     slug: "family-holiday",
