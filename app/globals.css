@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-serif-custom), Georgia, serif;
+  --font-sans: var(--font-sans-custom), system-ui, -apple-system, sans-serif;
+
+  --color-ocean-950: #021b2a;
+  --color-ocean-900: #083a5a;
+  --color-ocean-800: #0b5c8f;
+  --color-ocean-700: #0f7cc6;
+  --color-ocean-600: #3aa8e9;
+  --color-ocean-500: #7dd3fc;
+  --color-sand-50: #f9fcff;
+  --color-sand-100: #edf8ff;
+  --color-white-ice: #f7fbff;
+  --color-blue-sky: #dff6ff;
+}
+
+@layer utilities {
+  .font-serif-custom {
+    font-family: var(--font-serif-custom), Georgia, serif;
+  }
+  .font-sans-custom {
+    font-family: var(--font-sans-custom), system-ui, sans-serif;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans-custom), system-ui, sans-serif;
+  background: linear-gradient(180deg, #f3fbff 0%, #edf8ff 100%);
+  color: #0f172a;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(34, 197, 94, 0);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-whatsapp-pulse {
+  animation: pulseGlow 2.5s infinite;
+}
+
