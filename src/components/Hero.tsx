@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
-import TripPlanner from "./TripPlanner";
 
 export default function Hero() {
   return (
@@ -73,11 +72,6 @@ export default function Hero() {
           <span>100% Official Entry Permit Support & Local Assistance</span>
         </div>
 
-      </div>
-
-      {/* Floating Trip Planner Overlap */}
-      <div className="relative z-20 -mb-10 sm:-mb-14 pb-8">
-        <TripPlanner />
       </div>
     </section>
   );

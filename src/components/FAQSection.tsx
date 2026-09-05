@@ -44,6 +44,7 @@ export default function FAQSection() {
               <div key={faq.question} className="bg-sky-50 rounded-2xl border border-sky-100">
                 <button
                   type="button"
+                  suppressHydrationWarning
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-bold text-slate-900"
                 >

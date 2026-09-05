@@ -8,6 +8,7 @@ import { Compass, Menu, X, PhoneCall } from "lucide-react";
 const NAV_ITEMS = [
   { label: "Home", sectionId: "home", route: "/" },
   { label: "Packages", sectionId: "packages", route: "/packages" },
+  { label: "Accommodation", sectionId: "accommodation", route: "/accommodation" },
   { label: "Why Choose Us", sectionId: "why-choose-us" },
   { label: "Experiences", sectionId: "experiences" },
   { label: "About Us", sectionId: "about", route: "/about" },
@@ -105,6 +106,7 @@ export default function Header() {
 
   return (
     <header
+      suppressHydrationWarning
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? "bg-white/95 backdrop-blur-md shadow-sm py-3 border-b border-sky-100"

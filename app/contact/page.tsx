@@ -9,6 +9,7 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   Clock3,
+  Hotel,
   Mail,
   MapPin,
   Phone,
@@ -24,6 +25,13 @@ const PACKAGE_OPTIONS = [
   "Family Island Holiday(Agatti/ Kavaratti/Kalpeni). (3N / 4D)",
 ];
 
+const ACCOMMODATION_OPTIONS = [
+  "Select accommodation type...",
+  "Homestay",
+  "Resort",
+  "Standard Rooms",
+];
+
 const TRAVELER_OPTIONS = ["1 Person", "2 People", "3-4 People", "5+ People"];
 
 type FormValues = {
@@ -33,6 +41,7 @@ type FormValues = {
   travelDate: string;
   travelers: string;
   packageName: string;
+  accommodationType: string;
   message: string;
 };
 
@@ -43,6 +52,7 @@ const INITIAL_VALUES: FormValues = {
   travelDate: "",
   travelers: "",
   packageName: "",
+  accommodationType: "",
   message: "",
 };
 
@@ -128,11 +138,11 @@ export function ContactContent() {
             <h2 className="font-serif-custom text-3xl font-bold leading-tight text-cyan-950 sm:text-4xl">Book Your Package Enquiry</h2>
             <p className="mt-2 text-base text-slate-500">Get instant callback &amp; entry permit details</p>
 
-            <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-5">
+            <form onSubmit={handleSubmit} noValidate suppressHydrationWarning className="mt-8 flex flex-col gap-5">
               <div>
                 <label htmlFor="name" className="mb-2 block text-sm font-bold text-slate-800">Full Name *</label>
                 <FieldShell icon={UserRound}>
-                  <input id="name" value={values.name} onChange={(event) => updateValue("name", event.target.value)} className={inputClassName} />
+                  <input id="name" suppressHydrationWarning value={values.name} onChange={(event) => updateValue("name", event.target.value)} className={inputClassName} />
                 </FieldShell>
                 {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
               </div>
@@ -141,14 +151,14 @@ export function ContactContent() {
                 <div>
                   <label htmlFor="phone" className="mb-2 block text-sm font-bold text-slate-800">Phone Number (WhatsApp) *</label>
                   <FieldShell icon={Phone}>
-                    <input id="phone" type="tel" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} className={inputClassName} />
+                    <input id="phone" suppressHydrationWarning type="tel" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} className={inputClassName} />
                   </FieldShell>
                   {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
                 </div>
                 <div>
                   <label htmlFor="email" className="mb-2 block text-sm font-bold text-slate-800">Email Address *</label>
                   <FieldShell icon={Mail}>
-                    <input id="email" type="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} className={inputClassName} />
+                    <input id="email" suppressHydrationWarning type="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} className={inputClassName} />
                   </FieldShell>
                   {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
                 </div>
@@ -158,14 +168,14 @@ export function ContactContent() {
                 <div>
                   <label htmlFor="travelDate" className="mb-2 block text-sm font-bold text-slate-800">Preferred Travel Date *</label>
                   <FieldShell icon={CalendarDays}>
-                    <input id="travelDate" type="date" value={values.travelDate} onChange={(event) => updateValue("travelDate", event.target.value)} className={`${inputClassName} ${values.travelDate ? "text-slate-800" : "text-slate-400"}`} />
+                    <input id="travelDate" suppressHydrationWarning type="date" value={values.travelDate} onChange={(event) => updateValue("travelDate", event.target.value)} className={`${inputClassName} ${values.travelDate ? "text-slate-800" : "text-slate-400"}`} />
                   </FieldShell>
                   {errors.travelDate && <p className="mt-1 text-xs text-red-600">{errors.travelDate}</p>}
                 </div>
                 <div>
                   <label htmlFor="travelers" className="mb-2 block text-sm font-bold text-slate-800">Number of Travelers *</label>
                   <FieldShell icon={UsersRound}>
-                    <select id="travelers" value={values.travelers} onChange={(event) => updateValue("travelers", event.target.value)} className={`${inputClassName} ${values.travelers ? "text-slate-800" : "text-slate-400"}`}>
+                    <select id="travelers" suppressHydrationWarning value={values.travelers} onChange={(event) => updateValue("travelers", event.target.value)} className={`${inputClassName} ${values.travelers ? "text-slate-800" : "text-slate-400"}`}>
                       <option value="">Select travelers</option>
                       {TRAVELER_OPTIONS.map((option) => <option key={option}>{option}</option>)}
                     </select>
@@ -177,7 +187,7 @@ export function ContactContent() {
               <div>
                 <label htmlFor="packageName" className="mb-2 block text-sm font-bold text-slate-800">Preferred Package *</label>
                 <FieldShell icon={BriefcaseBusiness}>
-                  <select id="packageName" value={values.packageName} onChange={(event) => updateValue("packageName", event.target.value)} className={`${inputClassName} ${values.packageName ? "text-slate-800" : "text-slate-400"}`}>
+                  <select id="packageName" suppressHydrationWarning value={values.packageName} onChange={(event) => updateValue("packageName", event.target.value)} className={`${inputClassName} ${values.packageName ? "text-slate-800" : "text-slate-400"}`}>
                     {PACKAGE_OPTIONS.map((option) => <option key={option} value={option === PACKAGE_OPTIONS[0] ? "" : option}>{option}</option>)}
                   </select>
                 </FieldShell>
@@ -185,11 +195,20 @@ export function ContactContent() {
               </div>
 
               <div>
-                <label htmlFor="message" className="mb-2 block text-sm font-bold text-slate-800">Special Requirements / Message</label>
-                <textarea id="message" value={values.message} onChange={(event) => updateValue("message", event.target.value)} placeholder="Tell us about your travel plans, preferences or special requirements..." className="min-h-[130px] w-full resize-y rounded-xl border border-sky-100 bg-[#f3f8fa] px-4 py-3 text-sm leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
+                <label htmlFor="accommodationType" className="mb-2 block text-sm font-bold text-slate-800">Accommodation Type</label>
+                <FieldShell icon={Hotel}>
+                  <select id="accommodationType" suppressHydrationWarning value={values.accommodationType} onChange={(event) => updateValue("accommodationType", event.target.value)} className={`${inputClassName} ${values.accommodationType ? "text-slate-800" : "text-slate-400"}`}>
+                    {ACCOMMODATION_OPTIONS.map((option) => <option key={option} value={option === ACCOMMODATION_OPTIONS[0] ? "" : option}>{option}</option>)}
+                  </select>
+                </FieldShell>
               </div>
 
-              <button type="submit" className="mt-1 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sky-700 px-6 text-base font-bold text-white shadow-lg shadow-sky-900/10 transition-colors hover:bg-sky-800">
+              <div>
+                <label htmlFor="message" className="mb-2 block text-sm font-bold text-slate-800">Special Requirements / Message</label>
+                <textarea id="message" suppressHydrationWarning value={values.message} onChange={(event) => updateValue("message", event.target.value)} placeholder="Tell us about your travel plans, preferences or special requirements..." className="min-h-[130px] w-full resize-y rounded-xl border border-sky-100 bg-[#f3f8fa] px-4 py-3 text-sm leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
+              </div>
+
+              <button type="submit" suppressHydrationWarning className="mt-1 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sky-700 px-6 text-base font-bold text-white shadow-lg shadow-sky-900/10 transition-colors hover:bg-sky-800">
                 Request Package Enquiry <ArrowRight className="h-5 w-5" />
               </button>
               {submitted && <p role="status" className="rounded-lg bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700">Thank you. Our travel specialist will contact you shortly.</p>}

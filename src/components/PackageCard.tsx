@@ -67,6 +67,25 @@ const packageDetails = {
       "Personal Expenses.",
     ],
   },
+  "kalpeni-adventure": {
+    inclusions: [
+      "Pick up and Drop off.",
+      "Entry Permit to Lakshadweep.",
+      "Food and Accommodation(Beach Resort).",
+      "Transportation in Island.",
+      "Water Activities Including Kayaking, Snorkeling and Glass Bottomed Boat ride.",
+      "Turtle Watch, Fish Watch & Coral Watch.",
+      "Trip to Uninhabited Island(Pitti And Thilakam).",
+      "Personal Tour Guide."
+    ],
+    exclusions: [
+      "Ship Ticket.",
+      "Scuba Diving.",
+      "Cheriyam trip(Uninhabited island).",
+      "Night Fishing And Spot Grill.",
+      "Personal Expenses."
+    ],
+  },
 } as const;
 
 export default function PackageCard({ pkg }: PackageCardProps) {
@@ -97,6 +116,7 @@ export default function PackageCard({ pkg }: PackageCardProps) {
             src={pkg.image}
             alt={pkg.title}
             fill
+            loading="eager"
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />

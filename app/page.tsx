@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import PackagesSection from "@/components/PackagesSection";
+import AccommodationSection from "@/components/AccommodationSection";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import ExperiencesSection from "@/components/ExperiencesSection";
 import AboutSection from "@/components/AboutSection";
@@ -26,6 +27,8 @@ export default function Home() {
 
         {/* Section 6: Popular Packages */}
         <PackagesSection />
+        {/* Section 6: Accommodation */}
+        <AccommodationSection />
 
         {/* Section 7: Why Choose Us */}
         <WhyChooseUs />

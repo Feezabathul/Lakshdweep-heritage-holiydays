@@ -25,9 +25,6 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
 
       {/* Content */}
       <div className="relative z-10 p-6 flex flex-col gap-1 text-white">
-        <span className="text-[10px] font-bold tracking-widest text-cyan-300 uppercase bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-full w-fit mb-1 border border-white/20">
-          EXPLORE EXPERIENCE →
-        </span>
         <h3 className="font-serif-custom text-xl sm:text-2xl font-bold tracking-tight group-hover:text-amber-300 transition-colors">
           {experience.title}
         </h3>
