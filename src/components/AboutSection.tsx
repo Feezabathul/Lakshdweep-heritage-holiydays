@@ -1,7 +1,19 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { CheckCircle2, Shield, Anchor } from "lucide-react";
+import { CheckCircle2, Anchor } from "lucide-react";
+import { DEFAULT_HOMEPAGE_CONTENT, getHomepageContent } from "@/lib/content";
 
 export default function AboutSection() {
+  const [aboutText, setAboutText] = useState(DEFAULT_HOMEPAGE_CONTENT.aboutText);
+
+  useEffect(() => {
+    void getHomepageContent().then((data) => {
+      if (data.aboutText) setAboutText(data.aboutText);
+    });
+  }, []);
+
   return (
     <section id="about" className="py-20 sm:py-28 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,7 +55,7 @@ export default function AboutSection() {
             </h2>
 
             <p className="text-slate-600 text-base sm:text-lg leading-relaxed font-normal">
-              With over a decade of dedicated service, Lakshadweep Heritage Holidays specializes in crafting effortless, unforgettable island vacations. We take care of every detail—from entry permits and inter-island boat transfers to beachfront resort stays and aquatic excursions.
+              {aboutText}
             </p>
 
             {/* Core Values Bullet List */}

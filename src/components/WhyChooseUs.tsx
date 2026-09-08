@@ -1,6 +1,18 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import { DEFAULT_HOMEPAGE_CONTENT, getHomepageContent } from "@/lib/content";
 
 export default function WhyChooseUs() {
+  const [whyChooseUsText, setWhyChooseUsText] = useState(DEFAULT_HOMEPAGE_CONTENT.whyChooseUs);
+
+  useEffect(() => {
+    void getHomepageContent().then((data) => {
+      if (data.whyChooseUs) setWhyChooseUsText(data.whyChooseUs);
+    });
+  }, []);
+
   return (
     <section id="why-choose-us" className="relative overflow-hidden bg-white py-10 sm:py-14 lg:min-h-[calc(100vh-80px)] lg:py-8">
       <div className="absolute inset-x-0 top-0 h-2 bg-sky-100/70" />
@@ -13,7 +25,7 @@ export default function WhyChooseUs() {
             Why Travel With Lakshadweep Heritage Holidays?
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            Navigating Lakshadweep permits, vessel schedules, and island accommodations requires deep local knowledge. As native islanders based in Agatti, Kavaratti &amp; Kalpeni, we make your journey seamless from Kochi/ Goa to your final island footprint.
+            {whyChooseUsText}
           </p>
           <div className="mt-6 grid grid-cols-[56px_1fr] gap-4">
             <div className="h-14 w-14 rounded-2xl bg-cyan-100" />

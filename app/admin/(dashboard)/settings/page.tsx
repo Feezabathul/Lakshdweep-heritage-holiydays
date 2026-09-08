@@ -1,0 +1,3 @@
+import AdminResourcePage from "@/components/admin/AdminResourcePage";
+
+export default function AdminSettingsPage() { return <AdminResourcePage eyebrow="Configuration" title="Settings" description="Workspace preferences and integrations will be configured here." actionLabel="Add setting" columns={[{ key: "setting", label: "Setting" }, { key: "value", label: "Value" }, { key: "updated", label: "Last updated" }]} />; }

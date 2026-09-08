@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "Lakshadweep Heritage Holidays | Premium Tropical Island Escapes",
   description: "Curated island escapes, luxury water adventures, and end-to-end permit support for Agatti, Bangaram, Kavaratti, and Kalpeni islands in Lakshadweep.",
   keywords: ["Lakshadweep travel", "Agatti package", "Bangaram resort", "Lakshadweep tour operator", "Kavaratti honeymoon"],
+  icons: {
+    icon: "/logo.jpg",
+    shortcut: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
 };
 
 export default function RootLayout({

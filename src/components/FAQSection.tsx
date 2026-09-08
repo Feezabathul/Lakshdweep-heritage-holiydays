@@ -1,29 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-const FAQS = [
-  {
-    question: "How do I get an entry permit to visit Lakshadweep?",
-    answer: "An entry permit issued by the Lakshadweep Administration is mandatory for all Indian tourists. Lakshadweep Heritage Holidays handles the permit process and documentation for you.",
-  },
-  {
-    question: "What is the best time to visit Lakshadweep?",
-    answer: "The ideal time is from September to May, when the sea is calm, the lagoons are clear, and the weather is comfortable for island activities.",
-  },
-  {
-    question: "What is included in your travel packages?",
-    answer: "Packages can include entry permits, airport pickup, inter-island transfers, accommodation, meals, water activities, and local guide support.",
-  },
-  {
-    question: "Are water sports suitable for non-swimmers?",
-    answer: "Yes. Kayaking, glass-bottom boat rides, shallow lagoon snorkeling, and discovery scuba diving can be arranged safely with certified guides and life jackets.",
-  },
-];
+import { DEFAULT_FAQS, FAQItem, getFaqs } from "@/lib/content";
 
 export default function FAQSection() {
+  const [faqs, setFaqs] = useState<FAQItem[]>(DEFAULT_FAQS);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  useEffect(() => {
+    void getFaqs(true).then((data) => {
+      if (data && data.length > 0) {
+        setFaqs(data);
+      }
+    });
+  }, []);
 
   return (
     <section id="faq" className="py-20 sm:py-28 bg-white relative overflow-hidden">
@@ -38,10 +29,10 @@ export default function FAQSection() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {FAQS.map((faq, index) => {
+          {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div key={faq.question} className="bg-sky-50 rounded-2xl border border-sky-100">
+              <div key={faq.id || faq.question} className="bg-sky-50 rounded-2xl border border-sky-100">
                 <button
                   type="button"
                   suppressHydrationWarning

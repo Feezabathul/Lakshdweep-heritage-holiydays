@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -12,17 +12,23 @@ import {
   Heart,
   Users,
   Anchor,
-  CheckCircle2,
   MapPin,
-  Phone,
-  Award,
   Compass,
   MessageCircle,
   Waves,
   ArrowRight,
   ChevronDown,
   ChevronUp,
+  Award,
 } from "lucide-react";
+import {
+  AboutContent,
+  DEFAULT_ABOUT_CONTENT,
+  DEFAULT_FAQS,
+  FAQItem,
+  getAboutContent,
+  getFaqs,
+} from "@/lib/content";
 
 const CORE_VALUES = [
   {
@@ -106,27 +112,17 @@ const TEAM = [
   },
 ];
 
-const FAQS = [
-  {
-    q: "How do I get an entry permit to visit Lakshadweep?",
-    a: "An entry permit issued by the Lakshadweep Administration is mandatory for all Indian tourists. Lakshadweep Heritage Holidays handles 100% of your permit process! You only need to submit your valid ID proof (Aadhaar/Passport) and Passport Size Photo. We process all government paperwork seamlessly.",
-  },
-  {
-    q: "What is the best time to visit Lakshadweep?",
-    a: "The ideal time is from September to May. During these months, the sea is calm, lagoons are turquoise blue with high underwater visibility, and temperature ranges comfortably between 22°C to 32°C. June to September is the monsoon season with Rough Sea and rainfall.",
-  },
-  {
-    q: "What is included in your travel packages?",
-    a: "Our all-inclusive packages cover: Lakshadweep Entry Permit approval & documentation · Airport pickup & inter-island high-speed boat transfers · AC Standard Beach Front Rooms / Beach resorts / cottages accommodation · Breakfast, Lunch & Dinner (Fresh sea food & vegetarian options) · Complimentary snorkelling, Glass bottomed boat ride & kayaking sessions · 24/7 Local island guide support.",
-  },
-  {
-    q: "Are water sports suitable for non-swimmers?",
-    a: "Yes! Activities like Glass-bottomed boat ride, kayaking, shallow lagoon snorkelling, and Discovery Scuba Diving are 100% safe for non-swimmers. Certified life jackets are mandatory and certified PADI divemasters accompany you individually in shallow waters.",
-  },
-];
-
 export default function AboutPage() {
+  const [about, setAbout] = useState<AboutContent>(DEFAULT_ABOUT_CONTENT);
+  const [faqs, setFaqs] = useState<FAQItem[]>(DEFAULT_FAQS);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  useEffect(() => {
+    void getAboutContent().then(setAbout);
+    void getFaqs(true).then((data) => {
+      if (data && data.length > 0) setFaqs(data);
+    });
+  }, []);
 
   const whatsappMessage = encodeURIComponent(
     "Hello! I'd like to speak to an Island Expert about planning my Lakshadweep trip."
@@ -137,30 +133,26 @@ export default function AboutPage() {
       <Header />
 
       <main className="flex-grow pt-20">
-
         {/* ============================================================
-            SECTION 1 — HERO STORY SECTION (matches the uploaded design)
+            SECTION 1 — HERO STORY SECTION
         ============================================================ */}
         <section id="our-story" className="py-16 sm:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-              {/* LEFT: Large Aerial Photo of Lakshadweep Island */}
+              {/* LEFT: Photo of Lakshadweep Island */}
               <div className="relative">
                 <div className="relative h-[420px] sm:h-[540px] w-full rounded-3xl overflow-hidden shadow-2xl">
                   <Image
-                    src="https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1200&q=85"
-                    alt="Aerial view of Lakshadweep island with turquoise lagoon and white sand beach"
+                    src={about.image || DEFAULT_ABOUT_CONTENT.image}
+                    alt="Lakshadweep island view"
                     fill
                     priority
                     className="object-cover object-center hover:scale-105 transition-transform duration-700"
                     sizes="(max-width: 1024px) 100vw, 50vw"
                   />
-                  {/* Subtle gradient at the bottom */}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
                 </div>
 
-                {/* Overlapping Floating Badge */}
                 <div className="absolute -bottom-5 right-4 sm:-bottom-6 sm:-right-6 bg-white p-4 sm:p-5 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-4 max-w-[220px]">
                   <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center shrink-0">
                     <Anchor className="w-5 h-5 text-teal-700" />
@@ -174,24 +166,19 @@ export default function AboutPage() {
 
               {/* RIGHT: Story Content */}
               <div className="flex flex-col gap-6">
-                {/* Badge */}
                 <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-extrabold uppercase tracking-widest text-teal-700 bg-teal-50 border border-teal-200 px-4 py-1.5 rounded-full w-fit">
                   OUR STORY &amp; COMMITMENT
                 </span>
 
                 <h1 className="font-serif-custom text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight leading-[1.12]">
-                  Authentic Lakshadweep Hospitality by Native Islanders
+                  {about.heading}
                 </h1>
 
-                <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-                  Lakshadweep Heritage Holidays is a premier, registered island travel agency in Lakshadweep. Founded with a vision to make this untouched Indian archipelago accessible, comfortable, and memorable for travelers.
+                <p className="text-slate-600 text-base sm:text-lg leading-relaxed whitespace-pre-line">
+                  {about.description}
                 </p>
 
-                <p className="text-slate-600 text-base leading-relaxed">
-                  We understand that visiting Lakshadweep requires careful planning — from securing mandatory entry permits and coordinating vessel movements to selecting eco-friendly beach resorts. Our native team manages every detail behind the scenes, so you can simply step onto the white sands and relax.
-                </p>
-
-                {/* Stats Row — matching the uploaded design */}
+                {/* Stats Row */}
                 <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-slate-100">
                   <div>
                     <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">100%</div>
@@ -207,7 +194,6 @@ export default function AboutPage() {
                   </div>
                 </div>
 
-                {/* CTA Button — matching "Talk to an Island Expert" from design */}
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <a
                     href={`https://wa.me/919995554321?text=${whatsappMessage}`}
@@ -227,7 +213,6 @@ export default function AboutPage() {
                   </Link>
                 </div>
               </div>
-
             </div>
           </div>
         </section>
@@ -281,7 +266,6 @@ export default function AboutPage() {
             </div>
 
             <div className="relative">
-              {/* Vertical line */}
               <div className="absolute left-6 sm:left-1/2 top-0 bottom-0 w-px bg-slate-200 sm:-translate-x-0.5" />
 
               <div className="flex flex-col gap-10">
@@ -292,17 +276,14 @@ export default function AboutPage() {
                       i % 2 === 0 ? "sm:flex-row" : "sm:flex-row-reverse"
                     }`}
                   >
-                    {/* Dot */}
                     <div className="absolute left-4.5 sm:left-1/2 sm:-translate-x-2.5 w-5 h-5 rounded-full bg-teal-600 border-4 border-white shadow-md z-10 mt-1" />
 
-                    {/* Year chip — hidden on mobile */}
                     <div className={`hidden sm:flex sm:w-1/2 ${i % 2 === 0 ? "justify-end pr-10" : "justify-start pl-10"}`}>
                       <span className="bg-teal-50 border border-teal-200 text-teal-800 text-sm font-extrabold px-4 py-1.5 rounded-full">
                         {item.year}
                       </span>
                     </div>
 
-                    {/* Content card */}
                     <div className={`ml-14 sm:ml-0 sm:w-1/2 ${i % 2 === 0 ? "sm:pl-10" : "sm:pr-10"}`}>
                       <span className="sm:hidden bg-teal-50 border border-teal-200 text-teal-800 text-xs font-extrabold px-3 py-1 rounded-full mb-2 inline-block">
                         {item.year}
@@ -367,34 +348,10 @@ export default function AboutPage() {
         </section>
 
         {/* ============================================================
-            SECTION 5 — ACHIEVEMENT STATS BANNER
-        ============================================================ */}
-        <section className="py-14 sm:py-20 bg-teal-800 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-              {[
-                { val: "10+", label: "Years of Service" },
-                { val: "1000+", label: "Happy Travelers" },
-                { val: "100%", label: "Permit Success Rate" },
-                { val: "24/7", label: "On-Island Support" },
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col gap-1.5 items-center">
-                  <div className="text-4xl sm:text-5xl font-extrabold text-amber-300 leading-tight">
-                    {stat.val}
-                  </div>
-                  <div className="text-teal-100 text-sm font-medium">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================
-            SECTION 6 — FAQ ACCORDION
+            SECTION 5 — FAQ ACCORDION
         ============================================================ */}
         <section className="py-16 sm:py-24 border-t border-slate-100" style={{ background: "#eef9f8" }}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Header */}
             <div className="text-center mb-12">
               <span
                 className="inline-block px-5 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-5 border"
@@ -413,13 +370,12 @@ export default function AboutPage() {
               </p>
             </div>
 
-            {/* Accordion */}
             <div className="flex flex-col gap-4">
-              {FAQS.map((faq, i) => {
+              {faqs.map((faq, i) => {
                 const isOpen = openFaq === i;
                 return (
                   <div
-                    key={i}
+                    key={faq.id || i}
                     className="bg-white rounded-2xl shadow-sm transition-all duration-300"
                     style={{ border: isOpen ? "2px solid #1a9e96" : "2px solid #e5f0ef" }}
                   >
@@ -428,15 +384,17 @@ export default function AboutPage() {
                       className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left focus:outline-none"
                     >
                       <span className="font-bold text-base sm:text-lg leading-snug" style={{ color: "#0d3d4a" }}>
-                        {faq.q}
+                        {faq.question}
                       </span>
-                      {isOpen
-                        ? <ChevronUp className="shrink-0 w-5 h-5" style={{ color: "#1a9e96" }} />
-                        : <ChevronDown className="shrink-0 w-5 h-5" style={{ color: "#1a9e96" }} />}
+                      {isOpen ? (
+                        <ChevronUp className="shrink-0 w-5 h-5" style={{ color: "#1a9e96" }} />
+                      ) : (
+                        <ChevronDown className="shrink-0 w-5 h-5" style={{ color: "#1a9e96" }} />
+                      )}
                     </button>
                     {isOpen && (
                       <div className="px-6 pb-6 text-sm sm:text-base leading-relaxed" style={{ color: "#4a6b74" }}>
-                        {faq.a}
+                        {faq.answer}
                       </div>
                     )}
                   </div>
@@ -447,7 +405,7 @@ export default function AboutPage() {
         </section>
 
         {/* ============================================================
-            SECTION 7 — FINAL CTA
+            SECTION 6 — FINAL CTA
         ============================================================ */}
         <section className="py-16 sm:py-24 bg-white border-t border-slate-100">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col gap-6 items-center">
@@ -480,7 +438,6 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-
       </main>
 
       <Footer />

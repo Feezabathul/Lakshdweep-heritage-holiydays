@@ -3,7 +3,8 @@
 import { MouseEvent, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Menu, X, PhoneCall } from "lucide-react";
+import Image from "next/image";
+import { Menu, X, PhoneCall } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Home", sectionId: "home", route: "/" },
@@ -116,8 +117,15 @@ export default function Header() {
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 flex items-center justify-between gap-4">
         {/* Branding Logo */}
         <Link href="/" className="flex items-center gap-3 group shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-700 via-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
-            <Compass className="w-6 h-6 animate-spin-slow" />
+          <div className="relative w-11 h-11 rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform bg-white border border-sky-100 p-0.5">
+            <Image
+              src="/images/logo.jpg"
+              alt="Lakshadweep Heritage Holidays Logo"
+              fill
+              className="object-cover object-center rounded-lg"
+              sizes="44px"
+              priority
+            />
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-tight text-slate-900 leading-tight group-hover:text-sky-700 transition-colors whitespace-nowrap">

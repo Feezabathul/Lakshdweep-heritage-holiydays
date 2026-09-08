@@ -1,10 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import { DEFAULT_HOMEPAGE_CONTENT, getHomepageContent, HomepageContent } from "@/lib/content";
 
 export default function Hero() {
+  const [content, setContent] = useState<HomepageContent>(DEFAULT_HOMEPAGE_CONTENT);
+
+  useEffect(() => {
+    void getHomepageContent().then((data) => setContent(data));
+  }, []);
+
   return (
     <section id="home" className="relative min-h-[92vh] flex flex-col justify-between pt-24 sm:pt-28 pb-12 overflow-hidden bg-sky-950">
       {/* Background Image with Layered Ocean Gradient */}
@@ -38,15 +46,12 @@ export default function Hero() {
 
         {/* Main Heading */}
         <h1 className="font-serif-custom text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white max-w-4xl leading-[1.12] mb-6 drop-shadow-md">
-          Discover Paradise, <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-cyan-100 via-white to-sky-100 bg-clip-text text-transparent italic">
-            Beyond the Ordinary.
-          </span>
+          {content.heroHeading}
         </h1>
 
         {/* Supporting Text */}
         <p className="text-sky-50 text-base sm:text-xl max-w-2xl font-normal leading-relaxed mb-8 drop-shadow">
-          Curated island escapes, water adventures, and unforgettable travel experiences with end-to-end permit support.
+          {content.heroDescription}
         </p>
 
         {/* CTAs */}
@@ -55,7 +60,7 @@ export default function Hero() {
             href="/#packages"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 text-white font-bold px-8 py-4 rounded-full text-base shadow-xl shadow-sky-500/25 hover:shadow-sky-500/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
           >
-            <span>Explore Packages</span>
+            <span>{content.ctaText || "Explore Packages"}</span>
             <ArrowRight className="w-5 h-5" />
           </Link>
           <Link

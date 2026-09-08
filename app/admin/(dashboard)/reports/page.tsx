@@ -1,0 +1,3 @@
+import AdminResourcePage from "@/components/admin/AdminResourcePage";
+
+export default function AdminReportsPage() { return <AdminResourcePage eyebrow="Insights" title="Reports" description="A future reporting space for bookings, revenue, destinations, and demand." actionLabel="Create report" columns={[{ key: "report", label: "Report" }, { key: "period", label: "Period" }, { key: "generated", label: "Generated" }, { key: "status", label: "Status" }]} />; }
