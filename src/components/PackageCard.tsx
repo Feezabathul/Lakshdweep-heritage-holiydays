@@ -10,87 +10,10 @@ interface PackageCardProps {
   pkg: Package;
 }
 
-const packageDetails = {
-  "agatti-adventure": {
-    inclusions: [
-      "Pick up and Drop off.",
-      "Entry Permit to Lakshadweep.",
-      "Food and Accommodation.",
-      "Transportation in Island.",
-      "Water Activities Including Kayaking, Snorkeling and Glass Bottomed Boat ride.",
-      "Turtle Watch, Fish Watch & Coral Watch.",
-      "Trip to Uninhabited Island(Kalpitti).",
-      "Personal Tour Guide.",
-    ],
-    exclusions: [
-      "Ticket Charges.",
-      "Scuba Dive and Other Water activities.",
-      "Night Fishing And Spot Grill.",
-      "Personal Expenses.",
-    ],
-  },
-  "honeymoon-paradise": {
-    inclusions: [
-      "Pick up and Drop off.",
-      "Entry Permit to Lakshadweep.",
-      "Food and Accommodation(Beach Resort).",
-      "Transportation in Island.",
-      "Water Activities Including Kayaking, Snorkeling and Glass Bottomed Boat ride.",
-      "Turtle Watch, Fish Watch & Coral Watch.",
-      "Trip to Uninhabited Island.",
-      "Beach View Candlelight Dinner.",
-      "Personal Tour Guide.",
-    ],
-    exclusions: [
-      "Ticket Charges.",
-      "Scuba Dive and Other Water activities.",
-      "Night Fishing And Spot Grill.",
-      "Personal Expenses.",
-    ],
-  },
-  "family-holiday": {
-    inclusions: [
-      "Pick up and Drop off.",
-      "Entry Permit to Lakshadweep.",
-      "Food and Accommodation(Beach Resort).",
-      "Transportation in Island.",
-      "Water Activities Including Kayaking, Snorkeling and Glass Bottomed Boat ride.",
-      "Turtle Watch, Fish Watch & Coral Watch.",
-      "Trip to Uninhabited Island.",
-      "Beach View Candlelight Dinner.",
-      "Personal Tour Guide.",
-    ],
-    exclusions: [
-      "Ticket Charges.",
-      "Scuba Dive and Other Water activities.",
-      "Night Fishing And Spot Grill.",
-      "Personal Expenses.",
-    ],
-  },
-  "kalpeni-adventure": {
-    inclusions: [
-      "Pick up and Drop off.",
-      "Entry Permit to Lakshadweep.",
-      "Food and Accommodation(Beach Resort).",
-      "Transportation in Island.",
-      "Water Activities Including Kayaking, Snorkeling and Glass Bottomed Boat ride.",
-      "Turtle Watch, Fish Watch & Coral Watch.",
-      "Trip to Uninhabited Island(Pitti And Thilakam).",
-      "Personal Tour Guide."
-    ],
-    exclusions: [
-      "Ship Ticket.",
-      "Scuba Diving.",
-      "Cheriyam trip(Uninhabited island).",
-      "Night Fishing And Spot Grill.",
-      "Personal Expenses."
-    ],
-  },
-} as const;
-
 export default function PackageCard({ pkg }: PackageCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const details = packageDetails[pkg.id as keyof typeof packageDetails];
+  const inclusions = pkg.inclusions || [];
+  const exclusions = pkg.exclusions || [];
 
   return (
     <>
@@ -109,23 +32,18 @@ export default function PackageCard({ pkg }: PackageCardProps) {
         </div>
       )}
 
-      {/* Top Image & Category */}
+      {/* Top Image */}
       <div>
         <div className="relative h-56 w-full overflow-hidden">
           <Image
-            src={pkg.image}
-            alt={pkg.title}
+            src={pkg.image_url}
+            alt={pkg.name}
             fill
             loading="eager"
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-          <div className="absolute bottom-3 left-4">
-            <span className="bg-white/90 backdrop-blur-md text-sky-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-              {pkg.category}
-            </span>
-          </div>
         </div>
 
         {/* Card Body */}
@@ -138,7 +56,7 @@ export default function PackageCard({ pkg }: PackageCardProps) {
 
           {/* Title */}
           <h3 className="font-serif-custom text-xl font-bold text-sky-800 group-hover:text-sky-600 transition-colors mb-2">
-            {pkg.title}
+            {pkg.name}
           </h3>
 
           {/* Description */}
@@ -153,13 +71,14 @@ export default function PackageCard({ pkg }: PackageCardProps) {
       <div className="p-6 pt-0 border-t border-slate-100 mt-auto flex items-center justify-between">
         <div>
           <span className="text-[11px] font-medium text-slate-400 block">Starting from</span>
-          <span className="text-xl font-extrabold text-sky-800">{pkg.startingPrice}</span>
+          <span className="text-xl font-extrabold text-sky-800">₹{pkg.price.toLocaleString("en-IN")}</span>
           <span className="text-[10px] text-slate-400"> / person</span>
         </div>
 
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
+          suppressHydrationWarning
           className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             "bg-sky-700 hover:bg-sky-800 text-white shadow-md"
           }`}
@@ -177,13 +96,14 @@ export default function PackageCard({ pkg }: PackageCardProps) {
             <div className="flex items-center gap-3">
               <span className="text-2xl font-bold">≣</span>
               <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Package Overview &amp; Itinerary
+                Package Details
               </h3>
             </div>
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
               aria-label="Close package details"
+              suppressHydrationWarning
               className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors"
             >
               ×
@@ -191,26 +111,34 @@ export default function PackageCard({ pkg }: PackageCardProps) {
           </div>
 
           <p className="text-base sm:text-lg text-slate-700 mb-6">
-            Itinerary details will be provided upon booking confirmation.
+            Review the package inclusions and exclusions before booking.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <div>
               <h4 className="text-xl sm:text-2xl font-extrabold text-sky-700 mb-3">Inclusions</h4>
-              <ul className="space-y-2 text-slate-700 text-base sm:text-lg leading-relaxed list-disc pl-5">
-                {(details?.inclusions ?? []).map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              {inclusions.length > 0 ? (
+                <ul className="space-y-2 text-slate-700 text-base sm:text-lg leading-relaxed list-disc pl-5">
+                  {inclusions.map((item, idx) => (
+                    <li key={`${item}-${idx}`}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-slate-500 text-sm italic">No inclusions specified.</p>
+              )}
             </div>
 
             <div>
               <h4 className="text-xl sm:text-2xl font-extrabold text-sky-700 mb-3">Exclusions</h4>
-              <ul className="space-y-2 text-slate-700 text-base sm:text-lg leading-relaxed list-disc pl-5">
-                {(details?.exclusions ?? []).map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              {exclusions.length > 0 ? (
+                <ul className="space-y-2 text-slate-700 text-base sm:text-lg leading-relaxed list-disc pl-5">
+                  {exclusions.map((item, idx) => (
+                    <li key={`${item}-${idx}`}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-slate-500 text-sm italic">No exclusions specified.</p>
+              )}
             </div>
           </div>
 
@@ -218,6 +146,7 @@ export default function PackageCard({ pkg }: PackageCardProps) {
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
+              suppressHydrationWarning
               className="w-full sm:w-auto rounded-full bg-orange-400 px-5 py-3 text-base sm:text-lg font-bold text-white shadow-md hover:bg-orange-500 transition-colors"
             >
               Close

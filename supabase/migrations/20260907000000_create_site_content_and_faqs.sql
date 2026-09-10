@@ -32,12 +32,12 @@ create policy "Admins can modify site content"
   on public.site_content for all to authenticated using (
     exists (
       select 1 from public.profiles p
-      where p.id = auth.uid() and p.role in ('super_admin', 'manager')
+      where p.id = auth.uid() and p.role = 'admin'
     )
   ) with check (
     exists (
       select 1 from public.profiles p
-      where p.id = auth.uid() and p.role in ('super_admin', 'manager')
+      where p.id = auth.uid() and p.role = 'admin'
     )
   );
 
@@ -52,12 +52,12 @@ create policy "Admins can modify faqs"
   on public.faqs for all to authenticated using (
     exists (
       select 1 from public.profiles p
-      where p.id = auth.uid() and p.role in ('super_admin', 'manager')
+      where p.id = auth.uid() and p.role = 'admin'
     )
   ) with check (
     exists (
       select 1 from public.profiles p
-      where p.id = auth.uid() and p.role in ('super_admin', 'manager')
+      where p.id = auth.uid() and p.role = 'admin'
     )
   );
 

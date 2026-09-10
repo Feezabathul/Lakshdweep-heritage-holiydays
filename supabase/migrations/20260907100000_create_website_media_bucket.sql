@@ -26,7 +26,7 @@ create policy "Public can read website media"
   on storage.objects for select
   using (bucket_id = 'website-media');
 
--- 4. Admin upload: only super_admin or manager may insert objects
+-- 4. Admin upload: only admin may insert objects
 create policy "Admins can upload website media"
   on storage.objects for insert to authenticated
   with check (
@@ -34,11 +34,11 @@ create policy "Admins can upload website media"
     and exists (
       select 1 from public.profiles p
       where p.id = auth.uid()
-        and p.role in ('super_admin', 'manager')
+        and p.role = 'admin'
     )
   );
 
--- 5. Admin delete: only super_admin or manager may delete objects
+-- 5. Admin delete: only admin may delete objects
 create policy "Admins can delete website media"
   on storage.objects for delete to authenticated
   using (
@@ -46,7 +46,7 @@ create policy "Admins can delete website media"
     and exists (
       select 1 from public.profiles p
       where p.id = auth.uid()
-        and p.role in ('super_admin', 'manager')
+        and p.role = 'admin'
     )
   );
 
@@ -58,7 +58,7 @@ create policy "Admins can update website media"
     and exists (
       select 1 from public.profiles p
       where p.id = auth.uid()
-        and p.role in ('super_admin', 'manager')
+        and p.role = 'admin'
     )
   )
   with check (
@@ -66,6 +66,6 @@ create policy "Admins can update website media"
     and exists (
       select 1 from public.profiles p
       where p.id = auth.uid()
-        and p.role in ('super_admin', 'manager')
+        and p.role = 'admin'
     )
   );

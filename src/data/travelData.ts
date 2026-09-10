@@ -10,15 +10,14 @@ export interface Island {
 
 export interface Package {
   id: string;
-  title: string;
-  category: string;
+  name: string;
   duration: string;
-  startingPrice: string;
-  image: string;
+  price: number;
+  image_url: string;
   description: string;
-  highlights: string[];
+  inclusions: string[];
+  exclusions: string[];
   isPopular?: boolean;
-  slug: string;
 }
 
 export interface Experience {
@@ -87,48 +86,44 @@ export const ISLANDS_DATA: Island[] = [
 export const PACKAGES_DATA: Package[] = [
   {
     id: "kalpeni-adventure",
-    title: "Kalpeni Island Adventure Package",
-    category: "Island Escape",
+    name: "Kalpeni Island Adventure Package",
     duration: "3 Nights / 4 Days",
-    startingPrice: "₹11,399",
-    image: "/images/kalpeni_island.jpg",
-    description: "Thrill-filled itinerary with Sightseeing and Water Adventure",
-    highlights: [],
-    slug: "kalpeni-adventure",
+    price: 11399,
+    image_url: "/images/kalpeni_island.jpg",
+    description: "Thrill-filled holiday with Sightseeing and Water Adventure",
+    inclusions: ["Pick up and Drop off.", "Entry Permit to Lakshadweep.", "Food and Accommodation.", "Transportation in Island.", "Water activities including kayaking, snorkeling and glass bottomed boat ride.", "Turtle Watch, Fish Watch & Coral Watch.", "Trip to Uninhabited Island (Pitti and Thilakam).", "Personal Tour Guide."],
+    exclusions: ["Ship Ticket.", "Scuba Diving.", "Cheriyam trip (Uninhabited island).", "Night Fishing and Spot Grill.", "Personal Expenses."],
   },
   {
     id: "agatti-adventure",
-    title: "Agatti Island Adventure Package",
-    category: "Popular Getaway",
+    name: "Agatti Island Adventure Package",
     duration: "3 Nights / 4 Days",
-    startingPrice: "₹12,499",
-    image: "/images/agatti_island.jpg",
+    price: 12499,
+    image_url: "/images/agatti_island.jpg",
     description: "Explore the Beauty of Gateway of Lakshadweep",
-    highlights: [],
-    slug: "agatti-adventure",
+    inclusions: ["Pick up and Drop off.", "Entry Permit to Lakshadweep.", "Food and Accommodation.", "Transportation in Island.", "Water activities including kayaking, snorkeling and glass bottomed boat ride.", "Turtle Watch, Fish Watch & Coral Watch.", "Trip to Uninhabited Island (Kalpitti).", "Personal Tour Guide."],
+    exclusions: ["Ticket Charges.", "Scuba Dive and Other Water activities.", "Night Fishing and Spot Grill.", "Personal Expenses."],
   },
   {
     id: "honeymoon-paradise",
-    title: "Honeymoon in Paradise.(Agatti/ Kavaratti/ Kalpeni)",
-    category: "Romantic Luxury",
+    name: "Honeymoon in Paradise.(Agatti/ Kavaratti/ Kalpeni)",
     duration: "3 Nights / 4 Days",
-    startingPrice: "₹29,999",
-    image: "/images/honeymoon.jpg",
+    price: 29999,
+    image_url: "/images/honeymoon.jpg",
     description: "Secluded premium, private beach candlelight dinner & sunset cruise.",
-    highlights: [],
+    inclusions: ["Pick up and Drop off.", "Entry Permit to Lakshadweep.", "Food and Accommodation (Beach Resort).", "Transportation in Island.", "Water activities including kayaking, snorkeling and glass bottomed boat ride.", "Turtle Watch, Fish Watch & Coral Watch.", "Trip to Uninhabited Island.", "Beach View Candlelight Dinner.", "Personal Tour Guide."],
+    exclusions: ["Ticket Charges.", "Scuba Dive and Other Water activities.", "Night Fishing and Spot Grill.", "Personal Expenses."],
     isPopular: true,
-    slug: "honeymoon-paradise",
   },
   {
     id: "family-holiday",
-    title: "Family Island Holiday(Agatti/ Kavaratti/Kalpeni).",
-    category: "Family Special",
+    name: "Family Island Holiday(Agatti/ Kavaratti/Kalpeni).",
     duration: "3 Nights / 4 Days",
-    startingPrice: "₹13,399",
-    image: "/images/family_island_holiday.jpg",
+    price: 13399,
+    image_url: "/images/family_island_holiday.jpg",
     description: "Safe, fun-filled family vacation with shallow lagoon activities.",
-    highlights: [],
-    slug: "family-holiday",
+    inclusions: ["Pick up and Drop off.", "Entry Permit to Lakshadweep.", "Food and Accommodation (Beach Resort).", "Transportation in Island.", "Water activities including kayaking, snorkeling and glass bottomed boat ride.", "Turtle Watch, Fish Watch & Coral Watch.", "Trip to Uninhabited Island.", "Beach View Candlelight Dinner.", "Personal Tour Guide."],
+    exclusions: ["Ticket Charges.", "Scuba Dive and Other Water activities.", "Night Fishing and Spot Grill.", "Personal Expenses."],
   },
 ];
 

@@ -248,42 +248,33 @@ export async function runMigration(dryRun = false) {
 
   // 2. Migrate Packages
   for (const pkg of OLD_PACKAGES) {
-    // Check if package already exists by title/name
+    // Check if package already exists by name.
     const { data: existingPkgs, error: checkPkgErr } = await supabase
       .from('packages')
-      .select('id, title, name')
-      .or(`title.eq."${pkg.title}",name.eq."${pkg.name}"`);
+      .select('id, name')
+      .eq('name', pkg.name);
 
     if (checkPkgErr) {
-      console.warn(`Could not check existing package ${pkg.title}:`, checkPkgErr.message);
+      console.warn(`Could not check existing package ${pkg.name}:`, checkPkgErr.message);
     }
 
     if (existingPkgs && existingPkgs.length > 0) {
-      console.log(`Package "${pkg.title}" already exists in database. Skipping insert.`);
+      console.log(`Package "${pkg.name}" already exists in database. Skipping insert.`);
       continue;
     }
 
-    const linkedIslandId = islandMap[pkg.target_island_slug] || null;
-
     const packageRecord = {
-      title: pkg.title,
       name: pkg.name,
-      tagline: pkg.tagline,
       description: pkg.description,
       duration: pkg.duration,
       price: pkg.price,
-      raw_price: pkg.raw_price,
-      category: pkg.category,
-      status: pkg.status,
-      highlights: pkg.highlights,
+      image_url: null,
+      inclusions: pkg.highlights,
       exclusions: pkg.exclusions,
-      rooms: pkg.rooms,
-      food_preferences: pkg.food_preferences,
-      island_id: linkedIslandId,
     };
 
     if (dryRun) {
-      console.log(`[DRY RUN] Would insert package:`, pkg.title, `(Island ID: ${linkedIslandId})`);
+      console.log(`[DRY RUN] Would insert package:`, pkg.name);
     } else {
       const { data: insertedPkg, error: insertPkgErr } = await supabase
         .from('packages')
@@ -292,9 +283,9 @@ export async function runMigration(dryRun = false) {
         .single();
 
       if (insertPkgErr) {
-        console.error(`Failed to insert package ${pkg.title}:`, insertPkgErr.message);
+        console.error(`Failed to insert package ${pkg.name}:`, insertPkgErr.message);
       } else if (insertedPkg) {
-        console.log(`Successfully inserted package "${pkg.title}" (ID: ${insertedPkg.id})`);
+        console.log(`Successfully inserted package "${pkg.name}" (ID: ${insertedPkg.id})`);
       }
     }
   }

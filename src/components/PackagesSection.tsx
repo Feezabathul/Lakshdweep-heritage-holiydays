@@ -1,7 +1,52 @@
-import { PACKAGES_DATA } from "@/data/travelData";
+import { Package } from "@/data/travelData";
+import { createClient } from "@/lib/supabase/server";
 import PackageCard from "./PackageCard";
 
-export default function PackagesSection() {
+type DatabasePackage = {
+  id: string;
+  name?: string | null;
+  duration?: string | null;
+  price?: number | null;
+  image_url?: string | null;
+  description?: string | null;
+  inclusions?: string[] | null;
+  exclusions?: string[] | null;
+};
+
+function toPackage(item: DatabasePackage): Package {
+  return {
+    id: item.id,
+    name: item.name || "Untitled package",
+    duration: item.duration || "Flexible duration",
+    price: item.price || 0,
+    image_url: item.image_url || "/images/kalpeni_island.jpg",
+    description: item.description || "A carefully planned Lakshadweep island holiday.",
+    inclusions: Array.isArray(item.inclusions) ? item.inclusions : [],
+    exclusions: Array.isArray(item.exclusions) ? item.exclusions : [],
+  };
+}
+
+async function getPackages(): Promise<Package[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("packages")
+      .select("id, name, description, duration, price, image_url, inclusions, exclusions")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      return (data as DatabasePackage[]).map(toPackage);
+    }
+  } catch {
+    // Keep public page running safely
+  }
+
+  return [];
+}
+
+export default async function PackagesSection() {
+  const packages = await getPackages();
+
   return (
     <section id="packages" className="py-20 sm:py-28 bg-sky-50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,7 +65,7 @@ export default function PackagesSection() {
 
         {/* Packages Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 items-stretch">
-          {PACKAGES_DATA.map((pkg) => (
+          {packages.map((pkg) => (
             <PackageCard key={pkg.id} pkg={pkg} />
           ))}
         </div>
