@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -87,6 +88,8 @@ export function ContactContent() {
   const [values, setValues] = useState<FormValues>(INITIAL_VALUES);
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     void getContactContent().then(setContactData);
@@ -109,11 +112,35 @@ export function ContactContent() {
     return nextErrors;
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
-    setSubmitted(Object.keys(nextErrors).length === 0);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setIsSaving(true);
+    setSubmitError("");
+    const supabase = createClient();
+    const { error } = await supabase.from("bookings").insert({
+      customer_name: values.name.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      travel_date: values.travelDate || null,
+      travelers: values.travelers,
+      package_name: values.packageName,
+      accommodation_type: values.accommodationType,
+      message: values.message.trim(),
+      permit_status: "Pending",
+      status: "Pending",
+    });
+
+    if (error) {
+      setSubmitError("Sorry, we could not submit your enquiry. Please try again or contact us directly.");
+    } else {
+      setSubmitted(true);
+      setValues(INITIAL_VALUES);
+    }
+    setIsSaving(false);
   };
 
   const inputClassName = "min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-slate-800 outline-none placeholder:text-slate-400";
@@ -214,10 +241,11 @@ export function ContactContent() {
               <textarea id="message" suppressHydrationWarning value={values.message} onChange={(event) => updateValue("message", event.target.value)} placeholder="Tell us about your travel plans, preferences or special requirements..." className="min-h-[130px] w-full resize-y rounded-xl border border-sky-100 bg-[#f3f8fa] px-4 py-3 text-sm leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" />
             </div>
 
-            <button type="submit" suppressHydrationWarning className="mt-1 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sky-700 px-6 text-base font-bold text-white shadow-lg shadow-sky-900/10 transition-colors hover:bg-sky-800">
-              Request Package Enquiry <ArrowRight className="h-5 w-5" />
+            <button type="submit" disabled={isSaving} suppressHydrationWarning className="mt-1 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-sky-700 px-6 text-base font-bold text-white shadow-lg shadow-sky-900/10 transition-colors hover:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed">
+              {isSaving ? "Submitting..." : (<>Request Package Enquiry <ArrowRight className="h-5 w-5" /></>)}
             </button>
-            {submitted && <p role="status" className="rounded-lg bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700">Thank you. Our travel specialist will contact you shortly.</p>}
+            {submitted && <p role="status" className="rounded-lg bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700">Thank you! Our travel specialist will contact you shortly.</p>}
+            {submitError && <p role="alert" className="rounded-lg bg-rose-50 px-4 py-3 text-center text-sm font-semibold text-rose-700">{submitError}</p>}
           </form>
         </section>
       </div>

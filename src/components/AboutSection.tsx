@@ -26,6 +26,7 @@ export default function AboutSection() {
                 src="https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1200&q=85"
                 alt="Aerial view of Lakshadweep island with turquoise lagoon and white sand beach"
                 fill
+                priority
                 className="object-cover object-center hover:scale-105 transition-transform duration-700"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />

@@ -1,4 +1,4 @@
-import { Package } from "@/data/travelData";
+import { PACKAGES_DATA, Package } from "@/data/travelData";
 import { createClient } from "@/lib/supabase/server";
 import PackageCard from "./PackageCard";
 
@@ -14,6 +14,13 @@ type DatabasePackage = {
 };
 
 function toPackage(item: DatabasePackage): Package {
+  const livePackage = PACKAGES_DATA.find(
+    (packageItem) =>
+      packageItem.name.toLowerCase() === (item.name || "").toLowerCase(),
+  );
+  const inclusions = Array.isArray(item.inclusions) ? item.inclusions : [];
+  const exclusions = Array.isArray(item.exclusions) ? item.exclusions : [];
+
   return {
     id: item.id,
     name: item.name || "Untitled package",
@@ -21,8 +28,8 @@ function toPackage(item: DatabasePackage): Package {
     price: item.price || 0,
     image_url: item.image_url || "/images/kalpeni_island.jpg",
     description: item.description || "A carefully planned Lakshadweep island holiday.",
-    inclusions: Array.isArray(item.inclusions) ? item.inclusions : [],
-    exclusions: Array.isArray(item.exclusions) ? item.exclusions : [],
+    inclusions: inclusions.length ? inclusions : livePackage?.inclusions || [],
+    exclusions: exclusions.length ? exclusions : livePackage?.exclusions || [],
   };
 }
 

@@ -54,30 +54,35 @@ export const DEFAULT_CONTACT_CONTENT: ContactContentData = {
   businessHours: "Mon – Sat: 8:00 AM – 9:00 PM IST",
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function isUUID(str: string): boolean {
+  return UUID_REGEX.test(str);
+}
+
 export const DEFAULT_FAQS: FAQItem[] = [
   {
-    id: "faq-1",
+    id: "00000000-0000-0000-0000-000000000001",
     question: "How do I get an entry permit to visit Lakshadweep?",
     answer: "An entry permit issued by the Lakshadweep Administration is mandatory for all Indian tourists. Lakshadweep Heritage Holidays handles 100% of your permit process! You only need to submit your valid ID proof (Aadhaar/Passport) and Passport Size Photo. We process all government paperwork seamlessly.",
     display_order: 1,
     is_enabled: true,
   },
   {
-    id: "faq-2",
+    id: "00000000-0000-0000-0000-000000000002",
     question: "What is the best time to visit Lakshadweep?",
     answer: "The ideal time is from September to May. During these months, the sea is calm, lagoons are turquoise blue with high underwater visibility, and temperature ranges comfortably between 22°C to 32°C. June to September is the monsoon season with Rough Sea and rainfall.",
     display_order: 2,
     is_enabled: true,
   },
   {
-    id: "faq-3",
+    id: "00000000-0000-0000-0000-000000000003",
     question: "What is included in your travel packages?",
     answer: "Our all-inclusive packages cover: Lakshadweep Entry Permit approval & documentation · Airport pickup & inter-island high-speed boat transfers · AC Standard Beach Front Rooms / Beach resorts / cottages accommodation · Breakfast, Lunch & Dinner (Fresh sea food & vegetarian options) · Complimentary snorkelling, Glass bottomed boat ride & kayaking sessions · 24/7 Local island guide support.",
     display_order: 3,
     is_enabled: true,
   },
   {
-    id: "faq-4",
+    id: "00000000-0000-0000-0000-000000000004",
     question: "Are water sports suitable for non-swimmers?",
     answer: "Yes! Activities like Glass-bottomed boat ride, kayaking, shallow lagoon snorkelling, and Discovery Scuba Diving are 100% safe for non-swimmers. Certified life jackets are mandatory and certified PADI divemasters accompany you individually in shallow waters.",
     display_order: 4,
@@ -287,11 +292,45 @@ export async function addFaq(question: string, answer: string): Promise<{ succes
 /**
  * Update an existing FAQ
  */
-export async function updateFaq(id: string, updates: Partial<Pick<FAQItem, "question" | "answer" | "display_order" | "is_enabled">>): Promise<{ success: boolean; error?: string }> {
+export async function updateFaq(
+  id: string,
+  updates: Partial<Pick<FAQItem, "question" | "answer" | "display_order" | "is_enabled">>
+): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = createClient();
-    const { error } = await supabase.from("faqs").update(updates).eq("id", id);
+
+    // If id is not a valid UUID (e.g. from any legacy static string like "faq-1")
+    if (!isUUID(id)) {
+      const { error } = await supabase.from("faqs").insert({
+        question: updates.question ?? "",
+        answer: updates.answer ?? "",
+        display_order: updates.display_order ?? 1,
+        is_enabled: updates.is_enabled ?? true,
+      });
+      if (error) return { success: false, error: error.message };
+      return { success: true };
+    }
+
+    const { data, error } = await supabase
+      .from("faqs")
+      .update(updates)
+      .eq("id", id)
+      .select();
+
     if (error) return { success: false, error: error.message };
+
+    // If row wasn't in DB yet (e.g. static fallback with deterministic UUID), insert it
+    if (!data || data.length === 0) {
+      const { error: insertError } = await supabase.from("faqs").insert({
+        ...updates,
+        question: updates.question ?? "",
+        answer: updates.answer ?? "",
+        display_order: updates.display_order ?? 1,
+        is_enabled: updates.is_enabled ?? true,
+      });
+      if (insertError) return { success: false, error: insertError.message };
+    }
+
     return { success: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";
@@ -304,6 +343,10 @@ export async function updateFaq(id: string, updates: Partial<Pick<FAQItem, "ques
  */
 export async function deleteFaq(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    if (!isUUID(id)) {
+      // Static fallback string not in DB, nothing to delete
+      return { success: true };
+    }
     const supabase = createClient();
     const { error } = await supabase.from("faqs").delete().eq("id", id);
     if (error) return { success: false, error: error.message };
@@ -320,14 +363,32 @@ export async function deleteFaq(id: string): Promise<{ success: boolean; error?:
 export async function reorderFaqs(faqsInNewOrder: FAQItem[]): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = createClient();
-    const updates = faqsInNewOrder.map((faq, index) => ({
-      id: faq.id,
-      question: faq.question,
-      answer: faq.answer,
-      is_enabled: faq.is_enabled,
-      display_order: index + 1,
-    }));
-    const { error } = await supabase.from("faqs").upsert(updates, { onConflict: "id" });
+    for (let index = 0; index < faqsInNewOrder.length; index++) {
+      const faq = faqsInNewOrder[index];
+      if (isUUID(faq.id)) {
+        await supabase
+          .from("faqs")
+          .update({ display_order: index + 1 })
+          .eq("id", faq.id);
+      }
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Delete a specific content section's keys from site_content (live site reverts to defaults)
+ */
+export async function deleteContentSection(
+  section: "homepage" | "about" | "contact"
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createClient();
+    const sectionKeys = Object.values(KEY_MAP[section]);
+    const { error } = await supabase.from("site_content").delete().in("key", sectionKeys);
     if (error) return { success: false, error: error.message };
     return { success: true };
   } catch (err: unknown) {

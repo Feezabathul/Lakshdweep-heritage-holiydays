@@ -36,6 +36,7 @@ import {
   HomepageContent,
   addFaq,
   deleteFaq,
+  deleteContentSection,
   reorderFaqs,
   saveAboutContent,
   saveContactContent,
@@ -142,6 +143,51 @@ export default function AdminContentPage() {
     }
   };
 
+  // Handler to delete Homepage content from Supabase (live site reverts to defaults)
+  const handleDeleteHomepage = async () => {
+    if (!window.confirm("Delete all Homepage content from the database? The live site will revert to default static text.")) return;
+    setIsSaving(true);
+    setErrorMsg("");
+    const res = await deleteContentSection("homepage");
+    setIsSaving(false);
+    if (res.success) {
+      notifySuccess("Homepage content deleted. Live site now shows default text.");
+      void loadAllData();
+    } else {
+      setErrorMsg(res.error || "Failed to delete Homepage content.");
+    }
+  };
+
+  // Handler to delete About content from Supabase
+  const handleDeleteAbout = async () => {
+    if (!window.confirm("Delete all About Us content from the database? The live site will revert to default static text.")) return;
+    setIsSaving(true);
+    setErrorMsg("");
+    const res = await deleteContentSection("about");
+    setIsSaving(false);
+    if (res.success) {
+      notifySuccess("About Us content deleted. Live site now shows default text.");
+      void loadAllData();
+    } else {
+      setErrorMsg(res.error || "Failed to delete About Us content.");
+    }
+  };
+
+  // Handler to delete Contact content from Supabase
+  const handleDeleteContact = async () => {
+    if (!window.confirm("Delete all Contact content from the database? The live site will revert to default static text.")) return;
+    setIsSaving(true);
+    setErrorMsg("");
+    const res = await deleteContentSection("contact");
+    setIsSaving(false);
+    if (res.success) {
+      notifySuccess("Contact content deleted. Live site now shows default text.");
+      void loadAllData();
+    } else {
+      setErrorMsg(res.error || "Failed to delete Contact content.");
+    }
+  };
+
   // FAQ Modal Handlers
   const openAddFaqModal = () => {
     setEditingFaq(null);
@@ -203,7 +249,12 @@ export default function AdminContentPage() {
 
   const handleToggleFaqStatus = async (faq: FAQItem) => {
     const nextStatus = !faq.is_enabled;
-    const res = await updateFaq(faq.id, { is_enabled: nextStatus });
+    const res = await updateFaq(faq.id, {
+      is_enabled: nextStatus,
+      question: faq.question,
+      answer: faq.answer,
+      display_order: faq.display_order,
+    });
     if (res.success) {
       setFaqs((current) =>
         current.map((item) => (item.id === faq.id ? { ...item, is_enabled: nextStatus } : item))
@@ -365,7 +416,15 @@ export default function AdminContentPage() {
                 />
               </div>
 
-              <div className="flex justify-end pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void handleDeleteHomepage()}
+                  disabled={isSaving}
+                >
+                  <Trash2 className="h-4 w-4" /> Delete Section
+                </AdminButton>
                 <AdminButton type="submit" disabled={isSaving}>
                   <Save className="h-4 w-4" />
                   {isSaving ? "Saving..." : "Save Homepage Content"}
@@ -423,7 +482,15 @@ export default function AdminContentPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void handleDeleteAbout()}
+                  disabled={isSaving}
+                >
+                  <Trash2 className="h-4 w-4" /> Delete Section
+                </AdminButton>
                 <AdminButton type="submit" disabled={isSaving}>
                   <Save className="h-4 w-4" />
                   {isSaving ? "Saving..." : "Save About Content"}
@@ -586,7 +653,15 @@ export default function AdminContentPage() {
                 required
               />
 
-              <div className="flex justify-end pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <AdminButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void handleDeleteContact()}
+                  disabled={isSaving}
+                >
+                  <Trash2 className="h-4 w-4" /> Delete Section
+                </AdminButton>
                 <AdminButton type="submit" disabled={isSaving}>
                   <Save className="h-4 w-4" />
                   {isSaving ? "Saving..." : "Save Contact Info"}

@@ -1,8 +1,19 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock3 } from "lucide-react";
+import { ContactContentData, DEFAULT_CONTACT_CONTENT, getContactContent } from "@/lib/content";
 
 export default function Footer() {
+  const [contact, setContact] = useState<ContactContentData>(DEFAULT_CONTACT_CONTENT);
+
+  useEffect(() => {
+    void getContactContent().then((data) => {
+      if (data) setContact(data);
+    });
+  }, []);
   return (
     <footer className="bg-white text-slate-700 pt-16 pb-8 border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,19 +84,23 @@ export default function Footer() {
             <ul className="flex flex-col gap-3 text-sm text-slate-600">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-sky-600 shrink-0 mt-1" />
-                <span>lakshadweep heritage holidays kavaratti island</span>
+                <span>{contact.address || DEFAULT_CONTACT_CONTENT.address}</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-sky-600 shrink-0" />
-                <span>9037532124</span>
+                <a href={`tel:${contact.phone || DEFAULT_CONTACT_CONTENT.phone}`} className="hover:text-sky-700 transition-colors">
+                  {contact.phone || DEFAULT_CONTACT_CONTENT.phone}
+                </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sky-600 shrink-0" />
-                <span>lakshadweepheritageholidays@gmail.com</span>
+                <a href={`mailto:${contact.email || DEFAULT_CONTACT_CONTENT.email}`} className="hover:text-sky-700 transition-colors break-all">
+                  {contact.email || DEFAULT_CONTACT_CONTENT.email}
+                </a>
               </li>
               <li className="flex items-center gap-2.5">
                 <Clock3 className="w-4 h-4 text-sky-600 shrink-0" />
-                <span>10 AM – 6 PM(Monday to Friday)</span>
+                <span>{contact.businessHours || DEFAULT_CONTACT_CONTENT.businessHours}</span>
               </li>
             </ul>
           </div>

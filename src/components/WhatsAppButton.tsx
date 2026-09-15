@@ -1,11 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
+import { DEFAULT_CONTACT_CONTENT, getContactContent } from "@/lib/content";
 
 export default function WhatsAppButton() {
+  const [whatsapp, setWhatsapp] = useState(DEFAULT_CONTACT_CONTENT.whatsapp);
+
+  useEffect(() => {
+    void getContactContent().then((data) => {
+      if (data?.whatsapp) setWhatsapp(data.whatsapp);
+    });
+  }, []);
+
+  const cleanNumber = whatsapp.replace(/[^0-9]/g, "");
+  const formattedNumber = cleanNumber.startsWith("91") ? cleanNumber : `91${cleanNumber}`;
+  const whatsappUrl = `https://wa.me/${formattedNumber || "919037532124"}?text=Hi!%20I%20want%20to%20plan%20a%20trip%20to%20Lakshadweep.`;
+
   return (
     <a
-      href="https://wa.me/919037532124?text=Hi!%20I%20want%20to%20plan%20a%20trip%20to%20Lakshadweep."
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp with Lakshadweep Heritage Holidays"
@@ -18,3 +32,4 @@ export default function WhatsAppButton() {
     </a>
   );
 }
+
