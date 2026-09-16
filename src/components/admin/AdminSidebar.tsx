@@ -27,7 +27,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   const handleLogout = async () => {
     await createClient().auth.signOut();
     onClose();
-    router.push("/admin/login");
+    router.push("/");
     router.refresh();
   };
 

@@ -27,14 +27,16 @@ export default function WhyChooseUs() {
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
             {whyChooseUsText}
           </p>
-          <div className="mt-6 grid grid-cols-[56px_1fr] gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-cyan-100" />
+          <div className="mt-6 flex items-start gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-cyan-100 flex items-center justify-center shrink-0 text-cyan-700">
+              <Star className="w-6 h-6 fill-cyan-600 text-cyan-700" />
+            </div>
             <div>
               <h3 className="text-lg font-extrabold leading-relaxed text-cyan-950 sm:text-xl">
                 Native Lakshadweep Expertise, Born and rooted in the islands.
               </h3>
-              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-                Our local team offers authentic insights, hidden lagoon spots, and native premium hospitality. 100% Customizable Packages. Whether you want relaxed beach hammock time or high-adrenaline scuba diving, we tailor every detail to your pace. Stay, Food, Transport, Water activities, Island hoping &amp; Permit Assistance We process your mandatory Lakshadweep Entry Permits, book high-speed inter-island ferries, and arrange delicious meals. 24/7 On-Island Concierge Support Enjoy peace of mind with our local island co-ordinators on standby throughout your stay for any instant help. Transparent &amp; Honest Pricing All quotes are all-inclusive with zero surprise fees, mandatory government charges, or hidden taxes.
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+                Born and rooted in Lakshadweep, our local team provides authentic island experiences, customizable packages, complete travel and permit assistance, 24/7 on-island support, and transparent pricing with no hidden charges.
               </p>
             </div>
           </div>

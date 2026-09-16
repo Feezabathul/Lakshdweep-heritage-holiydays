@@ -14,7 +14,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
   const handleLogout = async () => {
     await createClient().auth.signOut();
-    router.push("/admin/login");
+    router.push("/");
     router.refresh();
   };
 
