@@ -128,7 +128,7 @@ export default function Header() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold tracking-tight text-slate-900 leading-tight group-hover:text-sky-700 transition-colors whitespace-nowrap">
+            <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight group-hover:text-sky-700 transition-colors whitespace-nowrap">
               Lakshadweep <span className="text-sky-600 font-extrabold">Heritage Holidays</span>
             </span>
           </div>

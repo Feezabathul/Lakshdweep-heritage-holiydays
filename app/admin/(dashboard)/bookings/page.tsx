@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChevronDown,
   Eye,
+  MessageCircle,
   Search,
   ShieldCheck,
   Trash2,
@@ -50,6 +51,17 @@ const permitTone = (status?: string | null): "teal" | "amber" | "rose" | "slate"
     case "cancelled": return "rose";
     default: return "amber";
   }
+};
+
+const formatWhatsAppUrl = (phone?: string | null, clientName?: string | null): string => {
+  if (!phone) return "";
+  let digits = phone.trim().replace(/[^0-9]/g, "");
+  if (!digits) return "";
+  if (digits.length === 10) {
+    digits = `91${digits}`;
+  }
+  const text = encodeURIComponent(`Hello ${clientName || "Valued Customer"}, regarding your Lakshadweep travel enquiry...`);
+  return `https://wa.me/${digits}?text=${text}`;
 };
 
 export default function AdminBookingsPage() {
@@ -201,6 +213,19 @@ export default function AdminBookingsPage() {
                         <Eye className="h-3.5 w-3.5" />
                         View
                       </button>
+                      {booking.phone && formatWhatsAppUrl(booking.phone, booking.customer_name) ? (
+                        <a
+                          href={formatWhatsAppUrl(booking.phone, booking.customer_name)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`WhatsApp chat with ${booking.customer_name ?? "client"}`}
+                          title={`Chat on WhatsApp (${booking.phone})`}
+                          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5 text-emerald-600 fill-emerald-100" />
+                          <span>WhatsApp</span>
+                        </a>
+                      ) : null}
                       <div className="relative">
                         <select
                           value={booking.permit_status ?? "Pending"}

@@ -90,8 +90,8 @@ export default function PackageCard({ pkg }: PackageCardProps) {
     </div>
 
     {isModalOpen && (
-      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/30 p-3 sm:p-6 backdrop-blur-[2px]">
-        <div className="w-full max-w-[820px] rounded-[22px] bg-white p-5 sm:p-7 shadow-2xl border border-slate-200">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/30 p-3 sm:p-6 backdrop-blur-[2px] overflow-y-auto">
+        <div className="w-full max-w-[820px] rounded-[22px] bg-white p-5 sm:p-7 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
           <div className="mb-4 flex items-center justify-between gap-3 text-sky-700">
             <div className="flex items-center gap-3">
               <span className="text-2xl font-bold">≣</span>

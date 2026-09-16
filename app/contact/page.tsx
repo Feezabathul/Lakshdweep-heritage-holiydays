@@ -175,7 +175,7 @@ export function ContactContent() {
             <div>
               <label htmlFor="name" className="mb-1 block text-xs font-bold text-slate-800">Full Name *</label>
               <FieldShell icon={UserRound}>
-                <input id="name" suppressHydrationWarning value={values.name} onChange={(event) => updateValue("name", event.target.value)} className={inputClassName} />
+                <input id="name" suppressHydrationWarning placeholder="Enter your name" value={values.name} onChange={(event) => updateValue("name", event.target.value)} className={inputClassName} />
               </FieldShell>
               {errors.name && <p className="mt-0.5 text-xs text-red-600">{errors.name}</p>}
             </div>
@@ -184,14 +184,14 @@ export function ContactContent() {
               <div>
                 <label htmlFor="phone" className="mb-1 block text-xs font-bold text-slate-800">Phone Number (WhatsApp) *</label>
                 <FieldShell icon={Phone}>
-                  <input id="phone" suppressHydrationWarning type="tel" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} className={inputClassName} />
+                  <input id="phone" suppressHydrationWarning type="tel" placeholder="Enter your number" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} className={inputClassName} />
                 </FieldShell>
                 {errors.phone && <p className="mt-0.5 text-xs text-red-600">{errors.phone}</p>}
               </div>
               <div>
                 <label htmlFor="email" className="mb-1 block text-xs font-bold text-slate-800">Email Address *</label>
                 <FieldShell icon={Mail}>
-                  <input id="email" suppressHydrationWarning type="email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} className={inputClassName} />
+                  <input id="email" suppressHydrationWarning type="email" placeholder="Enter your email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} className={inputClassName} />
                 </FieldShell>
                 {errors.email && <p className="mt-0.5 text-xs text-red-600">{errors.email}</p>}
               </div>
