@@ -1,26 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, MapPin, Clock3 } from "lucide-react";
-import { ContactContentData, DEFAULT_CONTACT_CONTENT, getContactContent } from "@/lib/content";
 
 export default function Footer() {
-  const [contact, setContact] = useState<ContactContentData>(DEFAULT_CONTACT_CONTENT);
-
-  useEffect(() => {
-    void getContactContent().then((data) => {
-      if (data) setContact(data);
-    });
-  }, []);
   return (
     <footer className="bg-white text-slate-700 pt-16 pb-8 border-t border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 pb-12 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-10 pb-12 border-b border-slate-200">
           
           {/* Column 1: Brand Info */}
-          <div className="sm:col-span-2 lg:col-span-2 flex flex-col gap-4">
+          <div className="flex flex-col gap-4 max-w-md">
             <Link href="/" className="flex items-center gap-3 group w-fit">
               <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-md bg-white border border-slate-200 p-0.5">
                 <Image
@@ -41,7 +31,7 @@ export default function Footer() {
               </div>
             </Link>
 
-            <p className="text-slate-600 text-sm leading-relaxed max-w-sm">
+            <p className="text-slate-600 text-sm leading-relaxed">
               Your premier specialized travel agency for Lakshadweep island tours. Providing end-to-end permit assistance, resort reservations, water adventures, and flight transfers.
             </p>
 
@@ -52,60 +42,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Quick Links */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-slate-900 text-base font-bold tracking-wide">Quick Links</h4>
-            <ul className="flex flex-col gap-2 text-sm text-slate-600">
-              <li><Link href="/" className="hover:text-sky-700 transition-colors">Home</Link></li>
-              <li><Link href="/#packages" className="hover:text-sky-700 transition-colors">Packages</Link></li>
-              <li><Link href="/#islands" className="hover:text-sky-700 transition-colors">Islands</Link></li>
-              <li><Link href="/#why-us" className="hover:text-sky-700 transition-colors">Why Choose Us</Link></li>
-              <li><Link href="/#about" className="hover:text-sky-700 transition-colors">About Us</Link></li>
-              <li><Link href="/faq" className="hover:text-sky-700 transition-colors">FAQ</Link></li>
-              <li><Link href="/contact" className="hover:text-sky-700 transition-colors">Contact Us</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 3: Popular Islands & Experiences */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-slate-900 text-base font-bold tracking-wide">Water Experiences</h4>
-            <ul className="flex flex-col gap-2 text-sm text-slate-600">
-              <li><Link href="/experiences/kayaking" className="text-cyan-600 font-semibold hover:text-cyan-800 transition-colors flex items-center gap-1.5"><span>Kayaking Lagoon Tour</span><span className="bg-sky-100 text-sky-700 text-[10px] px-1.5 py-0.5 rounded font-bold">HOT</span></Link></li>
-              <li><Link href="/experiences#scuba-diving" className="hover:text-sky-700 transition-colors">Scuba Diving</Link></li>
-              <li><Link href="/experiences#snorkeling" className="hover:text-sky-700 transition-colors">Snorkeling</Link></li>
-              <li><Link href="/islands#kalpeni" className="hover:text-sky-700 transition-colors">Kalpeni Kayak Haven</Link></li>
-              <li><Link href="/islands#bangaram" className="hover:text-sky-700 transition-colors">Bangaram Atoll</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 4: Contact Info */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-slate-900 text-base font-bold tracking-wide">Contact Us</h4>
-            <ul className="flex flex-col gap-3 text-sm text-slate-600">
-              <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-sky-600 shrink-0 mt-1" />
-                <span>{contact.address || DEFAULT_CONTACT_CONTENT.address}</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-sky-600 shrink-0" />
-                <a href={`tel:${contact.phone || DEFAULT_CONTACT_CONTENT.phone}`} className="hover:text-sky-700 transition-colors">
-                  {contact.phone || DEFAULT_CONTACT_CONTENT.phone}
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-sky-600 shrink-0" />
-                <a href={`mailto:${contact.email || DEFAULT_CONTACT_CONTENT.email}`} className="hover:text-sky-700 transition-colors break-all">
-                  {contact.email || DEFAULT_CONTACT_CONTENT.email}
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Clock3 className="w-4 h-4 text-sky-600 shrink-0" />
-                <span>{contact.businessHours || DEFAULT_CONTACT_CONTENT.businessHours}</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 5: For Staff */}
+          {/* Column 2: For Staff */}
           <div className="flex flex-col gap-3">
             <h4 className="text-slate-900 text-base font-bold tracking-wide">For Staff</h4>
             <ul className="flex flex-col gap-2 text-sm text-slate-600">

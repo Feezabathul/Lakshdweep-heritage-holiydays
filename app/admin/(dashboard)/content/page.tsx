@@ -69,27 +69,34 @@ export default function AdminContentPage() {
   const [faqAnswer, setFaqAnswer] = useState("");
   const [faqSearch, setFaqSearch] = useState("");
 
-  // Load all content
+  // Load all content — each section fetches independently so a failure
+  // in one (e.g. FAQs permission error) never blocks the others.
   const loadAllData = async () => {
     setIsLoading(true);
     setErrorMsg("");
-    try {
-      const [hpData, abData, ctData, faqData] = await Promise.all([
-        getHomepageContent(),
-        getAboutContent(),
-        getContactContent(),
-        getFaqs(false),
-      ]);
-      setHomepage(hpData);
-      setAbout(abData);
-      setContact(ctData);
-      setFaqs(faqData);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to load content";
+
+    const results = await Promise.allSettled([
+      getHomepageContent(),
+      getAboutContent(),
+      getContactContent(),
+      getFaqs(false),
+    ]);
+
+    const [hpResult, abResult, ctResult, faqResult] = results;
+
+    if (hpResult.status === "fulfilled") setHomepage(hpResult.value);
+    if (abResult.status === "fulfilled") setAbout(abResult.value);
+    if (ctResult.status === "fulfilled") setContact(ctResult.value);
+    if (faqResult.status === "fulfilled") setFaqs(faqResult.value);
+
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      const reason = (failed[0] as PromiseRejectedResult).reason;
+      const msg = reason instanceof Error ? reason.message : "Some content failed to load";
       setErrorMsg(msg);
-    } finally {
-      setIsLoading(false);
     }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {

@@ -3,14 +3,25 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, Anchor } from "lucide-react";
-import { DEFAULT_HOMEPAGE_CONTENT, getHomepageContent } from "@/lib/content";
+import { DEFAULT_HOMEPAGE_CONTENT, getAboutContent, getHomepageContent } from "@/lib/content";
 
 export default function AboutSection() {
-  const [aboutText, setAboutText] = useState(DEFAULT_HOMEPAGE_CONTENT.aboutText);
+  const [about, setAbout] = useState({
+    heading: "Your Trusted Partner for Lakshadweep",
+    description: DEFAULT_HOMEPAGE_CONTENT.aboutText,
+    image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1200&q=85",
+  });
 
   useEffect(() => {
-    void getHomepageContent().then((data) => {
-      if (data.aboutText) setAboutText(data.aboutText);
+    void Promise.allSettled([getHomepageContent(), getAboutContent()]).then(([hpRes, abRes]) => {
+      const hp = hpRes.status === "fulfilled" ? hpRes.value : null;
+      const ab = abRes.status === "fulfilled" ? abRes.value : null;
+
+      setAbout({
+        heading: ab?.heading || "Your Trusted Partner for Lakshadweep",
+        description: ab?.description || hp?.aboutText || DEFAULT_HOMEPAGE_CONTENT.aboutText,
+        image: ab?.image || "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1200&q=85",
+      });
     });
   }, []);
 
@@ -23,7 +34,7 @@ export default function AboutSection() {
           <div className="lg:col-span-6 relative">
             <div className="relative h-[420px] sm:h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
               <Image
-                src="https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1200&q=85"
+                src={about.image || "https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1200&q=85"}
                 alt="Aerial view of Lakshadweep island with turquoise lagoon and white sand beach"
                 fill
                 priority
@@ -52,11 +63,11 @@ export default function AboutSection() {
             </span>
 
             <h2 className="font-serif-custom text-3xl sm:text-5xl font-bold text-slate-900 tracking-tight leading-[1.15]">
-              Your Trusted Partner for Lakshadweep
+              {about.heading}
             </h2>
 
-            <p className="text-slate-600 text-base sm:text-lg leading-relaxed font-normal">
-              {aboutText}
+            <p className="text-slate-600 text-base sm:text-lg leading-relaxed font-normal whitespace-pre-line">
+              {about.description}
             </p>
 
             {/* Core Values Bullet List */}
