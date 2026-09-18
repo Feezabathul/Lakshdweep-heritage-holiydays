@@ -224,16 +224,28 @@ export default function AdminPackagesPage() {
     setEditingId(item.id);
     setSelected(item);
 
-    const liveDefaults = DEFAULT_SEED_PACKAGES.find(
-      (pkg) => pkg.name.toLowerCase() === (item.name || "").toLowerCase()
-    );
+    const nameKey = (item.name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const liveDefaults = DEFAULT_SEED_PACKAGES.find((pkg) => {
+      const pKey = pkg.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return (
+        pKey === nameKey ||
+        (nameKey.includes("honeymoon") && pKey.includes("honeymoon")) ||
+        (nameKey.includes("kalpeni") && pKey.includes("kalpeni")) ||
+        (nameKey.includes("agatti") && pKey.includes("agatti")) ||
+        (nameKey.includes("family") && pKey.includes("family"))
+      );
+    });
+
+    const parsedInclusions = listFrom(item.inclusions);
+    const parsedExclusions = listFrom(item.exclusions);
+
     const defaultInclusions =
-      item.inclusions != null
-        ? listFrom(item.inclusions)
+      parsedInclusions.length > 0
+        ? parsedInclusions
         : liveDefaults?.inclusions || [];
     const defaultExclusions =
-      item.exclusions != null
-        ? listFrom(item.exclusions)
+      parsedExclusions.length > 0
+        ? parsedExclusions
         : liveDefaults?.exclusions || [];
 
     setForm({

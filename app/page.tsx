@@ -12,6 +12,8 @@ import { ContactContent } from "./contact/page";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
+export const revalidate = 0;
+
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-sky-50 font-sans selection:bg-sky-600 selection:text-white">

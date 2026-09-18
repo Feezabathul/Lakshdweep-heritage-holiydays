@@ -15,29 +15,43 @@ type DatabasePackage = {
 
 export const revalidate = 0;
 
+function normalizeName(str: string): string {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 function toPackage(item: DatabasePackage): Package {
-  const livePackage = PACKAGES_DATA.find(
-    (packageItem) =>
-      packageItem.name.toLowerCase() === (item.name || "").toLowerCase(),
-  );
+  const nameKey = normalizeName(item.name || "");
+  const livePackage = PACKAGES_DATA.find((packageItem) => {
+    const pKey = normalizeName(packageItem.name);
+    return (
+      pKey === nameKey ||
+      (nameKey.includes("honeymoon") && pKey.includes("honeymoon")) ||
+      (nameKey.includes("kalpeni") && pKey.includes("kalpeni")) ||
+      (nameKey.includes("agatti") && pKey.includes("agatti")) ||
+      (nameKey.includes("family") && pKey.includes("family"))
+    );
+  });
+
   const inclusions =
-    item.inclusions != null && Array.isArray(item.inclusions)
+    Array.isArray(item.inclusions) && item.inclusions.length > 0
       ? item.inclusions
       : livePackage?.inclusions || [];
+
   const exclusions =
-    item.exclusions != null && Array.isArray(item.exclusions)
+    Array.isArray(item.exclusions) && item.exclusions.length > 0
       ? item.exclusions
       : livePackage?.exclusions || [];
 
   return {
     id: item.id,
-    name: item.name || "Untitled package",
-    duration: item.duration || "Flexible duration",
-    price: item.price || 0,
-    image_url: item.image_url || "/images/kalpeni_island.jpg",
-    description: item.description || "A carefully planned Lakshadweep island holiday.",
+    name: item.name || livePackage?.name || "Untitled package",
+    duration: item.duration || livePackage?.duration || "Flexible duration",
+    price: item.price || livePackage?.price || 0,
+    image_url: item.image_url || livePackage?.image_url || "/images/kalpeni_island.jpg",
+    description: item.description || livePackage?.description || "A carefully planned Lakshadweep island holiday.",
     inclusions,
     exclusions,
+    isPopular: livePackage?.isPopular,
   };
 }
 
@@ -49,14 +63,18 @@ async function getPackages(): Promise<Package[]> {
       .select("id, name, description, duration, price, image_url, inclusions, exclusions")
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error("Supabase packages fetch error:", error.message);
+    }
+
+    if (!error && data && data.length > 0) {
       return (data as DatabasePackage[]).map(toPackage);
     }
-  } catch {
-    // Keep public page running safely
+  } catch (err) {
+    console.error("Error fetching packages:", err);
   }
 
-  return [];
+  return PACKAGES_DATA;
 }
 
 export default async function PackagesSection() {
