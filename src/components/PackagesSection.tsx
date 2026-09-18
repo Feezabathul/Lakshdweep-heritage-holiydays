@@ -13,13 +13,21 @@ type DatabasePackage = {
   exclusions?: string[] | null;
 };
 
+export const revalidate = 0;
+
 function toPackage(item: DatabasePackage): Package {
   const livePackage = PACKAGES_DATA.find(
     (packageItem) =>
       packageItem.name.toLowerCase() === (item.name || "").toLowerCase(),
   );
-  const inclusions = Array.isArray(item.inclusions) ? item.inclusions : [];
-  const exclusions = Array.isArray(item.exclusions) ? item.exclusions : [];
+  const inclusions =
+    item.inclusions != null && Array.isArray(item.inclusions)
+      ? item.inclusions
+      : livePackage?.inclusions || [];
+  const exclusions =
+    item.exclusions != null && Array.isArray(item.exclusions)
+      ? item.exclusions
+      : livePackage?.exclusions || [];
 
   return {
     id: item.id,
@@ -28,8 +36,8 @@ function toPackage(item: DatabasePackage): Package {
     price: item.price || 0,
     image_url: item.image_url || "/images/kalpeni_island.jpg",
     description: item.description || "A carefully planned Lakshadweep island holiday.",
-    inclusions: inclusions.length ? inclusions : livePackage?.inclusions || [],
-    exclusions: exclusions.length ? exclusions : livePackage?.exclusions || [],
+    inclusions,
+    exclusions,
   };
 }
 

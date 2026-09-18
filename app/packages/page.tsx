@@ -3,6 +3,8 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import PackagesSection from "@/components/PackagesSection";
 
+export const revalidate = 0;
+
 export default function PackagesPage() {
   return (
     <div className="min-h-screen flex flex-col pt-20">

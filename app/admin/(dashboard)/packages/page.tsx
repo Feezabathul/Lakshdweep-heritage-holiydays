@@ -223,14 +223,27 @@ export default function AdminPackagesPage() {
   const openEdit = (item: PackageRecord) => {
     setEditingId(item.id);
     setSelected(item);
+
+    const liveDefaults = DEFAULT_SEED_PACKAGES.find(
+      (pkg) => pkg.name.toLowerCase() === (item.name || "").toLowerCase()
+    );
+    const defaultInclusions =
+      item.inclusions != null
+        ? listFrom(item.inclusions)
+        : liveDefaults?.inclusions || [];
+    const defaultExclusions =
+      item.exclusions != null
+        ? listFrom(item.exclusions)
+        : liveDefaults?.exclusions || [];
+
     setForm({
       name: displayName(item),
       description: item.description || "",
       price: Number(item.price || 0),
       duration: item.duration || "",
       image_url: item.image_url || "",
-      inclusions: listFrom(item.inclusions),
-      exclusions: listFrom(item.exclusions),
+      inclusions: defaultInclusions,
+      exclusions: defaultExclusions,
     });
     setErrorMessage("");
     setModal("form");
@@ -293,8 +306,8 @@ export default function AdminPackagesPage() {
       price,
       duration: form.duration.trim(),
       image_url: form.image_url,
-      inclusions: form.inclusions,
-      exclusions: form.exclusions,
+      inclusions: form.inclusions.map((item) => item.trim()).filter(Boolean),
+      exclusions: form.exclusions.map((item) => item.trim()).filter(Boolean),
     };
     const supabase = createClient();
     const result = editingId
@@ -772,6 +785,7 @@ function PackageListEditor({
             {...props}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
+            onBlur={addItem}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
@@ -782,6 +796,7 @@ function PackageListEditor({
           />
           <button
             type="button"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={addItem}
             aria-label={`Add ${label.toLowerCase()}`}
             className="rounded-lg p-2 text-teal-700 hover:bg-teal-50"
