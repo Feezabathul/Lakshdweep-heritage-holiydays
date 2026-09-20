@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Experience } from "@/data/travelData";
 
 interface ExperienceCardProps {
@@ -8,9 +7,8 @@ interface ExperienceCardProps {
 
 export default function ExperienceCard({ experience }: ExperienceCardProps) {
   return (
-    <Link
-      href={`/experiences/${experience.slug}`}
-      className="group relative h-44 sm:h-48 rounded-2xl overflow-hidden border border-slate-200/60 shadow-md hover:shadow-2xl transition-all duration-500 flex flex-col justify-end block"
+    <div
+      className="group relative h-44 sm:h-48 rounded-2xl overflow-hidden border border-slate-200/60 shadow-md hover:shadow-2xl transition-all duration-500 flex flex-col justify-end"
     >
       <Image
         src={experience.image}
@@ -21,18 +19,15 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
       />
       
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent group-hover:via-slate-950/60 transition-colors duration-500" />
+      {/* Overlay — only a soft bottom fade so text is readable but image stays clear */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent transition-colors duration-500" />
 
-      {/* Content */}
-      <div className="relative z-10 p-3 sm:p-3.5 flex flex-col gap-0.5 text-white">
+      {/* Title only */}
+      <div className="relative z-10 p-3 sm:p-3.5 text-white">
         <h3 className="font-serif-custom text-sm sm:text-base font-bold tracking-tight group-hover:text-amber-300 transition-colors leading-snug">
           {experience.title}
         </h3>
-        <p className="text-slate-300 text-[11px] sm:text-xs font-normal line-clamp-2 leading-tight">
-          {experience.subtitle}
-        </p>
       </div>
-    </Link>
+    </div>
   );
 }

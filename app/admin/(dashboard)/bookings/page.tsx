@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Eye,
   MessageCircle,
-  Search,
   ShieldCheck,
   Trash2,
   X,
@@ -68,7 +67,6 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [search, setSearch] = useState("");
   const [permitFilter, setPermitFilter] = useState<"all" | PermitStatus>("all");
   const [selected, setSelected] = useState<Booking | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -98,15 +96,11 @@ export default function AdminBookingsPage() {
   useEffect(() => { void loadBookings(); }, []);
 
   const rows = useMemo(() => {
-    const query = search.trim().toLowerCase();
     return bookings.filter((b) => {
-      const matchSearch = !query ||
-        (b.customer_name ?? "").toLowerCase().includes(query) ||
-        (b.package_name ?? "").toLowerCase().includes(query);
       const matchPermit = permitFilter === "all" || (b.permit_status ?? "Pending") === permitFilter;
-      return matchSearch && matchPermit;
+      return matchPermit;
     });
-  }, [bookings, search, permitFilter]);
+  }, [bookings, permitFilter]);
 
   const updatePermitStatus = async (booking: Booking, status: PermitStatus) => {
     if (updatingId) return;
@@ -153,17 +147,7 @@ export default function AdminBookingsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row">
-        <label className="relative flex-1">
-          <span className="sr-only">Search client or package</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search client name or package..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-          />
-        </label>
+      <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-800">
           <ShieldCheck className="h-4 w-4 text-slate-400" />
           <span className="sr-only">Filter by permit status</span>
@@ -264,7 +248,7 @@ export default function AdminBookingsPage() {
               {bookings.length ? "No matching bookings" : "No enquiries yet"}
             </h3>
             <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
-              {bookings.length ? "Try changing your search or permit status filter." : "Customer enquiries submitted from the website will appear here."}
+              {bookings.length ? "Try changing your permit status filter." : "Customer enquiries submitted from the website will appear here."}
             </p>
           </div>
         ) : null}

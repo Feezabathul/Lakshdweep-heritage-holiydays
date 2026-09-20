@@ -1,9 +1,27 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { EXPERIENCES_DATA } from "@/data/travelData";
+import { getExperienceImages, ExperienceImages } from "@/lib/content";
 import ExperienceCard from "./ExperienceCard";
 
-export default function ExperiencesSection() {
+export default function ExperiencesSection({
+  className = "",
+}: {
+  className?: string;
+} = {}) {
+  const [experienceImages, setExperienceImages] = useState<ExperienceImages>({});
+
+  useEffect(() => {
+    void getExperienceImages().then((images) => {
+      if (images && Object.keys(images).length > 0) {
+        setExperienceImages(images);
+      }
+    });
+  }, []);
+
   return (
-    <section id="experiences" className="py-8 sm:py-12 lg:py-14 bg-slate-50 relative overflow-hidden">
+    <section id="experiences" className={`py-8 sm:py-12 lg:py-14 relative overflow-hidden ${className || "bg-slate-50"}`}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
@@ -13,18 +31,24 @@ export default function ExperiencesSection() {
           <h2 className="font-serif-custom text-2xl sm:text-4xl font-bold text-blue-600 tracking-tight mb-2">
             Unforgettable Lakshadweep Experiences
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base max-w-2xl font-normal">
-            Immerse yourself in world-class watersports, pristine coral reefs, and tranquil island lifestyle activities.
-          </p>
         </div>
 
         {/* Experiences Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3.5 sm:gap-4">
-          {EXPERIENCES_DATA.map((exp) => (
-            <ExperienceCard key={exp.id} experience={exp} />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5 sm:gap-6">
+          {EXPERIENCES_DATA.map((exp) => {
+            // Use admin-uploaded image override if available, otherwise fall back to static default
+            const resolvedImage = experienceImages[exp.id] ?? exp.image;
+            return (
+              <ExperienceCard
+                key={exp.id}
+                experience={{ ...exp, image: resolvedImage }}
+              />
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
+
+

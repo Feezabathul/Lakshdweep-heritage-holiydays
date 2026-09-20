@@ -9,7 +9,6 @@ import {
   ImageOff,
   LayoutList,
   Loader2,
-  Search,
   Trash2,
   Upload,
   X,
@@ -95,8 +94,7 @@ export default function AdminMediaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // search / filter / view
-  const [search, setSearch] = useState("");
+  // filter / view
   const [folderFilter, setFolderFilter] = useState<"all" | Folder>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -165,13 +163,11 @@ export default function AdminMediaPage() {
 
   // ------ filter ------
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
     return files.filter((f) => {
       const matchFolder = folderFilter === "all" || f.folder === folderFilter;
-      const matchSearch = !q || f.name.toLowerCase().includes(q) || f.folder.includes(q);
-      return matchFolder && matchSearch;
+      return matchFolder;
     });
-  }, [files, search, folderFilter]);
+  }, [files, folderFilter]);
 
   // ------ upload ------
   const validateFile = (file: File): string | null => {
@@ -336,18 +332,7 @@ export default function AdminMediaPage() {
       )}
 
       {/* ---- Toolbar ---- */}
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row">
-        <label className="relative flex-1">
-          <span className="sr-only">Search images</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            id="media-search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by filename or folder…"
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-          />
-        </label>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 
         <select
           id="media-folder-filter"
@@ -454,14 +439,14 @@ function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-20 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-        {hasFiles ? <Search className="h-6 w-6" /> : <ImageOff className="h-6 w-6" />}
+        <ImageOff className="h-6 w-6" />
       </div>
       <h3 className="mt-4 text-sm font-semibold text-slate-900">
         {hasFiles ? "No images match your filters" : "No images uploaded yet"}
       </h3>
       <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
         {hasFiles
-          ? "Try adjusting your search query or folder filter."
+          ? "Try adjusting your folder filter."
           : "Upload your first image to start building the media library."}
       </p>
       {!hasFiles && (

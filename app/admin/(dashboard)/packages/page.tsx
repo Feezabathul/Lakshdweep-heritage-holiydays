@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import { Eye, ImagePlus, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Eye, ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AdminButton from "@/components/admin/AdminButton";
 
@@ -156,7 +156,6 @@ export default function AdminPackagesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [search, setSearch] = useState("");
   const [modal, setModal] = useState<"form" | "details" | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<PackageRecord | null>(null);
@@ -197,21 +196,7 @@ export default function AdminPackagesPage() {
     void loadData();
   }, []);
 
-  const filteredPackages = useMemo(
-    () =>
-      packages.filter((item) => {
-        const query = search.trim().toLowerCase();
-        const matchesSearch =
-          !query ||
-          [
-            displayName(item),
-            item.description || "",
-            item.duration || "",
-          ].some((value) => value.toLowerCase().includes(query));
-        return matchesSearch;
-      }),
-    [packages, search],
-  );
+  const filteredPackages = packages;
 
   const openCreate = () => {
     setEditingId(null);
@@ -371,18 +356,6 @@ export default function AdminPackagesPage() {
           {errorMessage}
         </div>
       )}
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row">
-        <label className="relative flex-1">
-          <span className="sr-only">Search packages</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search packages..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-          />
-        </label>
-      </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
@@ -474,12 +447,10 @@ export default function AdminPackagesPage() {
               <PackageEmptyIcon />
             </div>
             <h3 className="mt-4 text-sm font-semibold text-slate-900">
-              {packages.length ? "No matching packages" : "No packages found"}
+              No packages found
             </h3>
             <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
-              {packages.length
-                ? "Try changing your search filters."
-                : "Add your first package to populate the catalog."}
+              Add your first package to populate the catalog.
             </p>
           </div>
         ) : null}

@@ -5,6 +5,9 @@ import AdminBadge from "@/components/admin/AdminBadge";
 import AdminStatCard from "@/components/admin/AdminStatCard";
 import AdminTable from "@/components/admin/AdminTable";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type BookingRecord = Record<string, unknown>;
 
 type DashboardBooking = {
@@ -25,6 +28,14 @@ const valueFrom = (record: BookingRecord, keys: string[]) => {
   return "-";
 };
 
+const getPermitStatus = (record: BookingRecord): string => {
+  const val = record.permit_status ?? record.status;
+  if (val !== null && val !== undefined && String(val).trim()) {
+    return String(val).trim();
+  }
+  return "-";
+};
+
 const formatDate = (value: string) => {
   if (value === "-") return value;
   const date = new Date(value);
@@ -41,23 +52,26 @@ const statusTone = (status: string): "teal" | "amber" | "slate" | "rose" => {
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
-  const { data, count, error } = await supabase.from("bookings").select("*", { count: "exact" }).limit(50);
+  const { data, count, error } = await supabase
+    .from("bookings")
+    .select("*", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .limit(50);
   const records = (data ?? []) as BookingRecord[];
-  const hasPermitStatusField = records.some((record) => Object.prototype.hasOwnProperty.call(record, "permit_status"));
   const bookings: DashboardBooking[] = records.map((record, index) => ({
     id: valueFrom(record, ["id", "booking_id"]) || String(index),
     customer: valueFrom(record, ["customer_name", "guest_name", "name", "full_name", "customer"]),
     packageName: valueFrom(record, ["package_name", "package", "package_title", "tour_package"]),
     travelDate: formatDate(valueFrom(record, ["travel_date", "start_date", "check_in", "date"])),
     travelers: valueFrom(record, ["travelers", "traveller_count", "guests", "number_of_travelers"]),
-    status: valueFrom(record, ["status", "booking_status"]) || "New",
+    status: getPermitStatus(record),
     createdDate: formatDate(valueFrom(record, ["created_at", "created_date", "submitted_at"])),
   }));
 
-  const pendingPermits = hasPermitStatusField ? records.filter((record) => valueFrom(record, ["permit_status"]).toLowerCase().includes("pending")).length : 0;
-  const approvedPermits = hasPermitStatusField ? records.filter((record) => valueFrom(record, ["permit_status"]).toLowerCase().includes("approved")).length : 0;
+  const pendingPermits = records.filter((record) => getPermitStatus(record).toLowerCase().includes("pending")).length;
+  const approvedPermits = records.filter((record) => getPermitStatus(record).toLowerCase().includes("approved")).length;
   const dataUnavailable = Boolean(error);
-  const permitStatusDetail = dataUnavailable || !hasPermitStatusField ? "Requires permit_status field" : "From Supabase booking records";
+  const permitStatusDetail = dataUnavailable ? "Requires permit_status field" : "From Supabase booking records";
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-8">

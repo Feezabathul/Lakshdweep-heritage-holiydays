@@ -32,6 +32,9 @@ export interface FAQItem {
   updated_at?: string;
 }
 
+/** Map of experience ID → uploaded image URL stored in Supabase site_content */
+export type ExperienceImages = Record<string, string>;
+
 export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   heroHeading: "Discover Paradise, Beyond the Ordinary.",
   heroDescription: "Curated island escapes, water adventures, and unforgettable travel experiences with end-to-end permit support.",
@@ -112,6 +115,11 @@ const KEY_MAP = {
     businessHours: "contact_business_hours",
   },
 };
+
+/** Supabase site_content key for an experience image */
+export function experienceImageKey(experienceId: string): string {
+  return `experience_image_${experienceId}`;
+}
 
 /**
  * Fetch key-value site content map from Supabase with safe fallback to defaults
@@ -411,6 +419,54 @@ export async function seedDefaultContent(): Promise<{ success: boolean; error?: 
       const { id, ...rest } = faq;
       await supabase.from("faqs").upsert({ ...rest, id }, { onConflict: "id" });
     }
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Get all experience images stored in Supabase site_content.
+ * Returns a map of experienceId → imageUrl (only entries that exist in DB).
+ */
+export async function getExperienceImages(): Promise<ExperienceImages> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("site_content")
+      .select("key, value")
+      .like("key", "experience_image_%");
+    if (error || !data || data.length === 0) return {};
+    const result: ExperienceImages = {};
+    for (const item of data) {
+      if (item.key && item.value) {
+        // strip prefix "experience_image_" to get the experience id
+        const id = (item.key as string).replace("experience_image_", "");
+        result[id] = item.value as string;
+      }
+    }
+    return result;
+  } catch (err) {
+    console.warn("Failed to fetch experience images from Supabase.", err);
+    return {};
+  }
+}
+
+/**
+ * Save a single experience image URL to Supabase site_content.
+ */
+export async function saveExperienceImage(
+  experienceId: string,
+  imageUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createClient();
+    const key = experienceImageKey(experienceId);
+    const { error } = await supabase
+      .from("site_content")
+      .upsert({ key, value: imageUrl }, { onConflict: "key" });
+    if (error) return { success: false, error: error.message };
     return { success: true };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unknown error";

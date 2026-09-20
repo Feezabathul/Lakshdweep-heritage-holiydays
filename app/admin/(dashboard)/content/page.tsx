@@ -1,24 +1,26 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
   CheckCircle2,
   Edit3,
-  Globe,
   HelpCircle,
   Home,
+  Image as ImageIcon,
   Info,
-  Mail,
+  Layers,
+  Loader2,
   Plus,
   Phone,
   RotateCcw,
   Save,
-  Search,
   Trash2,
+  Upload,
   X,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 import AdminBadge from "@/components/admin/AdminBadge";
 import AdminButton from "@/components/admin/AdminButton";
@@ -28,10 +30,12 @@ import {
   DEFAULT_ABOUT_CONTENT,
   DEFAULT_CONTACT_CONTENT,
   DEFAULT_HOMEPAGE_CONTENT,
+  ExperienceImages,
   FAQItem,
   getAboutContent,
   getContactContent,
   getFaqs,
+  getExperienceImages,
   getHomepageContent,
   HomepageContent,
   addFaq,
@@ -40,12 +44,31 @@ import {
   reorderFaqs,
   saveAboutContent,
   saveContactContent,
+  saveExperienceImage,
   saveHomepageContent,
   seedDefaultContent,
   updateFaq,
 } from "@/lib/content";
+import { EXPERIENCES_DATA } from "@/data/travelData";
 
-type TabType = "homepage" | "about" | "faq" | "contact";
+type TabType = "homepage" | "about" | "faq" | "contact" | "experiences";
+
+const EXP_BUCKET = "website-media";
+const EXP_FOLDER = "experiences";
+const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
+/** Sanitise a filename for storage */
+function sanitiseFilename(original: string): string {
+  const ext = original.slice(original.lastIndexOf(".")).toLowerCase();
+  const base = original
+    .slice(0, original.lastIndexOf("."))
+    .toLowerCase()
+    .replace(/[^a-z0-9_\-\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+  return `${base || "image"}${ext}`;
+}
 
 export default function AdminContentPage() {
   const [activeTab, setActiveTab] = useState<TabType>("homepage");
@@ -55,6 +78,11 @@ export default function AdminContentPage() {
   const [about, setAbout] = useState<AboutContent>(DEFAULT_ABOUT_CONTENT);
   const [contact, setContact] = useState<ContactContentData>(DEFAULT_CONTACT_CONTENT);
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
+
+  // Experience images state
+  const [experienceImages, setExperienceImages] = useState<ExperienceImages>({});
+  const [expUploading, setExpUploading] = useState<Record<string, boolean>>({});
+  const expFileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Page level state
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +95,6 @@ export default function AdminContentPage() {
   const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
   const [faqQuestion, setFaqQuestion] = useState("");
   const [faqAnswer, setFaqAnswer] = useState("");
-  const [faqSearch, setFaqSearch] = useState("");
 
   // Load all content — each section fetches independently so a failure
   // in one (e.g. FAQs permission error) never blocks the others.
@@ -80,14 +107,16 @@ export default function AdminContentPage() {
       getAboutContent(),
       getContactContent(),
       getFaqs(false),
+      getExperienceImages(),
     ]);
 
-    const [hpResult, abResult, ctResult, faqResult] = results;
+    const [hpResult, abResult, ctResult, faqResult, expResult] = results;
 
     if (hpResult.status === "fulfilled") setHomepage(hpResult.value);
     if (abResult.status === "fulfilled") setAbout(abResult.value);
     if (ctResult.status === "fulfilled") setContact(ctResult.value);
     if (faqResult.status === "fulfilled") setFaqs(faqResult.value);
+    if (expResult.status === "fulfilled") setExperienceImages(expResult.value);
 
     const failed = results.filter((r) => r.status === "rejected");
     if (failed.length > 0) {
@@ -97,6 +126,57 @@ export default function AdminContentPage() {
     }
 
     setIsLoading(false);
+  };
+
+  /** Upload an image file for an experience item and save the URL to Supabase */
+  const handleExperienceImageUpload = async (experienceId: string, file: File) => {
+    // Validate
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setErrorMsg(`Unsupported file type. Please use JPG, PNG, or WEBP.`);
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setErrorMsg(`File exceeds 5 MB limit.`);
+      return;
+    }
+
+    setExpUploading((prev) => ({ ...prev, [experienceId]: true }));
+    setErrorMsg("");
+
+    try {
+      const supabase = createClient();
+      const safeName = sanitiseFilename(file.name);
+      const path = `${EXP_FOLDER}/${experienceId}_${Date.now()}_${safeName}`;
+
+      // Upload to storage bucket
+      const { error: uploadError } = await supabase.storage
+        .from(EXP_BUCKET)
+        .upload(path, file, { upsert: true, cacheControl: "3600" });
+
+      if (uploadError) {
+        setErrorMsg(`Upload failed: ${uploadError.message}`);
+        return;
+      }
+
+      // Get the public URL
+      const { data: urlData } = supabase.storage.from(EXP_BUCKET).getPublicUrl(path);
+      const publicUrl = urlData.publicUrl;
+
+      // Save the URL to Supabase site_content
+      const res = await saveExperienceImage(experienceId, publicUrl);
+      if (res.success) {
+        setExperienceImages((prev) => ({ ...prev, [experienceId]: publicUrl }));
+        notifySuccess("Experience image updated successfully!");
+      } else {
+        setErrorMsg(res.error || "Failed to save image URL.");
+      }
+    } finally {
+      setExpUploading((prev) => ({ ...prev, [experienceId]: false }));
+      // Reset the file input so same file can be re-selected
+      if (expFileRefs.current[experienceId]) {
+        expFileRefs.current[experienceId]!.value = "";
+      }
+    }
   };
 
   useEffect(() => {
@@ -304,12 +384,7 @@ export default function AdminContentPage() {
     }
   };
 
-  const filteredFaqs = faqs.filter(
-    (f) =>
-      !faqSearch.trim() ||
-      f.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
-      f.answer.toLowerCase().includes(faqSearch.toLowerCase())
-  );
+  const filteredFaqs = faqs;
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-7">
@@ -344,12 +419,13 @@ export default function AdminContentPage() {
       )}
 
       {/* Section Tabs */}
-      <div className="flex border-b border-slate-200 bg-white px-3 pt-3 rounded-t-xl">
+      <div className="flex flex-wrap border-b border-slate-200 bg-white px-3 pt-3 rounded-t-xl">
         {[
           { id: "homepage", label: "Homepage", icon: Home },
           { id: "about", label: "About Us", icon: Info },
           { id: "faq", label: "FAQ", icon: HelpCircle },
           { id: "contact", label: "Contact", icon: Phone },
+          { id: "experiences", label: "Experiences", icon: Layers },
         ].map(({ id, label, icon: Icon }) => {
           const active = activeTab === id;
           return (
@@ -519,18 +595,6 @@ export default function AdminContentPage() {
                 </AdminButton>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    value={faqSearch}
-                    onChange={(e) => setFaqSearch(e.target.value)}
-                    placeholder="Search questions or answers..."
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-teal-500"
-                  />
-                </div>
-              </div>
-
               <div className="overflow-hidden rounded-xl border border-slate-200">
                 <table className="min-w-full divide-y divide-slate-200">
                   <thead className="bg-slate-50">
@@ -675,6 +739,93 @@ export default function AdminContentPage() {
                 </AdminButton>
               </div>
             </form>
+          )}
+
+          {/* TAB 5: EXPERIENCES */}
+          {activeTab === "experiences" && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Experience Card Images</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Upload a custom image for each experience card. Images are uploaded to the{" "}
+                  <code className="font-mono text-teal-700">website-media/experiences</code> bucket and immediately reflected on the public Experience page.
+                </p>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {EXPERIENCES_DATA.map((exp) => {
+                  const currentImage = experienceImages[exp.id] ?? exp.image;
+                  const isUploading = expUploading[exp.id] ?? false;
+
+                  return (
+                    <div
+                      key={exp.id}
+                      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      {/* Image preview */}
+                      <div className="relative h-36 w-full overflow-hidden rounded-lg bg-slate-200 border border-slate-200">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={currentImage}
+                          alt={exp.title}
+                          className="h-full w-full object-cover"
+                        />
+                        {isUploading && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/50">
+                            <Loader2 className="h-6 w-6 animate-spin text-white" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Experience name */}
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">{exp.title}</p>
+                        <p className="text-xs text-slate-500 truncate">{exp.subtitle}</p>
+                      </div>
+
+                      {/* Upload button */}
+                      <div>
+                        <input
+                          ref={(el) => { expFileRefs.current[exp.id] = el; }}
+                          type="file"
+                          id={`exp-upload-${exp.id}`}
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          className="sr-only"
+                          disabled={isUploading}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            const file = e.target.files?.[0];
+                            if (file) void handleExperienceImageUpload(exp.id, file);
+                          }}
+                        />
+                        <label
+                          htmlFor={`exp-upload-${exp.id}`}
+                          className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-teal-400 hover:bg-teal-50 hover:text-teal-700 ${
+                            isUploading ? "pointer-events-none opacity-50" : ""
+                          }`}
+                        >
+                          {isUploading ? (
+                            <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading...</>
+                          ) : (
+                            <><Upload className="h-3.5 w-3.5" /> Replace Image</>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* Show if image is from Supabase */}
+                      {experienceImages[exp.id] && (
+                        <p className="text-[10px] text-teal-600 font-medium flex items-center gap-1">
+                          <ImageIcon className="h-3 w-3" /> Custom image active
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="text-xs text-slate-400">
+                Accepted formats: JPG, PNG, WEBP · Max 5 MB per image. Upload replaces the current image on the live site immediately after page refresh.
+              </p>
+            </div>
           )}
         </div>
       )}

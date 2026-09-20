@@ -34,11 +34,19 @@ async function getAccommodations(): Promise<Accommodation[]> {
   return [];
 }
 
-export default async function AccommodationSection() {
+export default async function AccommodationSection({
+  className = "",
+}: {
+  className?: string;
+} = {}) {
   const accommodations = await getAccommodations();
 
   return (
-    <section id="accommodation" className="py-16 sm:py-24 bg-white">
+    <section
+      id="accommodation"
+      className={`py-16 sm:py-24 ${className}`}
+      style={{ backgroundColor: "#dcf6ed" }}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-12 sm:mb-16">

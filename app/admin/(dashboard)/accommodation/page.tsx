@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import { Edit3, ImagePlus, Plus, Search, Trash2, X } from "lucide-react";
+import { Edit3, ImagePlus, Plus, Trash2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import AdminButton from "@/components/admin/AdminButton";
 
@@ -95,7 +95,6 @@ export default function AdminAccommodationPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AccommodationForm>(EMPTY_FORM);
@@ -144,15 +143,8 @@ export default function AdminAccommodationPage() {
     void loadData();
   }, []);
 
-  const filteredAccommodations = useMemo(() => {
-    return accommodations.filter((item) => {
-      const query = search.trim().toLowerCase();
-      const heading = getHeading(item).toLowerCase();
-      const type = getType(item).toLowerCase();
-      const points = listFrom(item.description_points ?? item.amenities).join(" ").toLowerCase();
-      return !query || [heading, type, points].some((str) => str.includes(query));
-    });
-  }, [accommodations, search]);
+  const filteredAccommodations = accommodations;
+
 
   const openCreate = () => {
     setEditingId(null);
@@ -287,19 +279,6 @@ export default function AdminAccommodationPage() {
         </div>
       )}
 
-      {/* Filter Bar */}
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row">
-        <label className="relative flex-1">
-          <span className="sr-only">Search accommodations</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by heading or type..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-          />
-        </label>
-      </div>
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -399,12 +378,10 @@ export default function AdminAccommodationPage() {
               <ImagePlus className="h-5 w-5" />
             </div>
             <h3 className="mt-4 text-sm font-semibold text-slate-900">
-              {accommodations.length ? "No matching accommodations" : "No accommodations found"}
+              No accommodations found
             </h3>
             <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
-              {accommodations.length
-                ? "Try changing your search or type filter."
-                : "Add your first accommodation to populate the inventory."}
+              Add your first accommodation to populate the inventory.
             </p>
           </div>
         ) : null}
