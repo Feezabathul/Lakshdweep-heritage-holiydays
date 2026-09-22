@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+
 import { createClient } from "@/lib/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -19,6 +20,8 @@ import {
   UsersRound,
 } from "lucide-react";
 import { ContactContentData, DEFAULT_CONTACT_CONTENT, getContactContent } from "@/lib/content";
+
+
 
 const PACKAGE_OPTIONS = [
   "Select a package...",
@@ -63,7 +66,7 @@ type IconType = typeof UserRound;
 
 function FieldShell({ icon: Icon, children }: { icon: IconType; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[46px] items-center gap-3 rounded-xl border border-slate-200/90 bg-[#f1f5f9] px-3.5 transition-all duration-200 focus-within:border-sky-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100">
+    <div className="flex min-h-[46px] items-center gap-3 rounded-xl border border-slate-200/90 bg-[#f1f5f9] px-3.5 transition-all duration-200 focus-within:border-sky-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100 font-sans-custom">
       <Icon className="h-4 w-4 shrink-0 text-slate-400 transition-colors" strokeWidth={2} />
       {children}
     </div>
@@ -77,8 +80,8 @@ function ContactDetail({ icon: Icon, title, value }: { icon: IconType; title: st
         <Icon className="h-4 w-4" strokeWidth={2.5} />
       </div>
       <div className="pt-0.5">
-        <h2 className="text-sm font-bold text-cyan-950 sm:text-base">{title}</h2>
-        <p className="mt-0.5 text-xs leading-relaxed text-slate-600 sm:text-sm">{value}</p>
+        <h2 className="text-sm font-bold text-cyan-950 sm:text-base font-serif-custom">{title}</h2>
+        <p className="mt-0.5 text-xs leading-relaxed text-slate-600 sm:text-sm font-sans-custom">{value}</p>
       </div>
     </div>
   );
@@ -190,16 +193,16 @@ export function ContactContent() {
     setIsSaving(false);
   };
 
-  const inputClassName = "min-w-0 flex-1 border-0 bg-transparent py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 font-normal";
+  const inputClassName = "min-w-0 flex-1 border-0 bg-transparent py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 font-normal font-sans-custom";
 
   return (
-    <section id="contact" className="bg-[#f6fbfd] px-4 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-24">
+    <section id="contact" className="bg-[#f6fbfd] px-4 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-24 font-sans-custom">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.97fr)_minmax(520px,1.03fr)] lg:items-start lg:gap-12">
         <section className="pt-1 lg:pt-4">
-          <span className="inline-flex rounded-full bg-cyan-50 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-cyan-500">
+          <span className="inline-flex rounded-full bg-cyan-50 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-cyan-500 font-sans-custom">
             Start Planning
           </span>
-          <h1 className="mt-3 max-w-xl font-serif-custom text-3xl font-bold leading-[1.1] tracking-tight text-cyan-950 sm:text-4xl lg:text-[2.5rem]">
+          <h1 className="mt-3 max-w-xl text-3xl font-bold leading-[1.1] tracking-tight text-cyan-950 sm:text-4xl lg:text-[2.5rem] font-serif-custom">
             Ready for Your Lakshadweep Escape?
           </h1>
 
@@ -215,7 +218,7 @@ export function ContactContent() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
                 <Calculator className="h-4 w-4" strokeWidth={2.5} />
               </div>
-              <h2 className="font-serif-custom text-base font-bold text-cyan-950 sm:text-lg">
+              <h2 className="text-base font-bold text-cyan-950 sm:text-lg font-serif-custom">
                 Estimated Trip Calculator
               </h2>
             </div>
@@ -227,7 +230,7 @@ export function ContactContent() {
                 <div className="h-3 w-2/3 rounded bg-slate-100" />
               </div>
             ) : lowestPackage ? (
-              <div className="mt-4 space-y-2.5 text-sm text-slate-700">
+              <div className="mt-4 space-y-2.5 text-sm text-slate-700 font-sans-custom">
                 <p>
                   <span className="font-semibold text-slate-900">Selected Package: </span>
                   <span className="font-medium text-cyan-950">
@@ -254,67 +257,71 @@ export function ContactContent() {
         </section>
 
         <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 lg:p-9 shadow-sm">
-          <h2 className="text-2xl sm:text-[1.75rem] font-bold tracking-tight text-slate-900 font-sans">Book Your Package Enquiry</h2>
-          <p className="mt-1.5 text-sm text-slate-500">Get instant callback &amp; entry permit details</p>
+          <h2 className="text-2xl sm:text-[1.75rem] font-bold tracking-tight text-slate-900 font-serif-custom">
+            Book Your Package Enquiry
+          </h2>
+          <p className="mt-1.5 text-sm text-slate-500 font-sans-custom">
+            Get instant callback &amp; entry permit details
+          </p>
 
           <form onSubmit={handleSubmit} noValidate suppressHydrationWarning className="mt-6 flex flex-col gap-4 sm:gap-4.5">
             <div>
-              <label htmlFor="name" className="mb-1.5 block text-xs font-semibold text-slate-700">Full Name *</label>
+              <label htmlFor="name" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Full Name *</label>
               <FieldShell icon={UserRound}>
                 <input id="name" suppressHydrationWarning placeholder="Enter your name" value={values.name} onChange={(event) => updateValue("name", event.target.value)} className={inputClassName} />
               </FieldShell>
-              {errors.name && <p className="mt-1 text-xs text-rose-500">{errors.name}</p>}
+              {errors.name && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.name}</p>}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="phone" className="mb-1.5 block text-xs font-semibold text-slate-700">Phone Number (WhatsApp) *</label>
+                <label htmlFor="phone" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Phone Number (WhatsApp) *</label>
                 <FieldShell icon={Phone}>
                   <input id="phone" suppressHydrationWarning type="tel" placeholder="Enter your number" value={values.phone} onChange={(event) => updateValue("phone", event.target.value)} className={inputClassName} />
                 </FieldShell>
-                {errors.phone && <p className="mt-1 text-xs text-rose-500">{errors.phone}</p>}
+                {errors.phone && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.phone}</p>}
               </div>
               <div>
-                <label htmlFor="email" className="mb-1.5 block text-xs font-semibold text-slate-700">Email Address *</label>
+                <label htmlFor="email" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Email Address *</label>
                 <FieldShell icon={Mail}>
                   <input id="email" suppressHydrationWarning type="email" placeholder="Enter your email" value={values.email} onChange={(event) => updateValue("email", event.target.value)} className={inputClassName} />
                 </FieldShell>
-                {errors.email && <p className="mt-1 text-xs text-rose-500">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.email}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="travelDate" className="mb-1.5 block text-xs font-semibold text-slate-700">Preferred Travel Date *</label>
+                <label htmlFor="travelDate" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Preferred Travel Date *</label>
                 <FieldShell icon={CalendarDays}>
                   <input id="travelDate" suppressHydrationWarning type="date" value={values.travelDate} onChange={(event) => updateValue("travelDate", event.target.value)} className={`${inputClassName} ${values.travelDate ? "text-slate-800" : "text-slate-400"}`} />
                 </FieldShell>
-                {errors.travelDate && <p className="mt-1 text-xs text-rose-500">{errors.travelDate}</p>}
+                {errors.travelDate && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.travelDate}</p>}
               </div>
               <div>
-                <label htmlFor="travelers" className="mb-1.5 block text-xs font-semibold text-slate-700">Number of Travelers *</label>
+                <label htmlFor="travelers" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Number of Travelers *</label>
                 <FieldShell icon={UsersRound}>
                   <select id="travelers" suppressHydrationWarning value={values.travelers} onChange={(event) => updateValue("travelers", event.target.value)} className={`${inputClassName} ${values.travelers ? "text-slate-800" : "text-slate-400"}`}>
                     <option value="">Select travelers</option>
                     {TRAVELER_OPTIONS.map((option) => <option key={option}>{option}</option>)}
                   </select>
                 </FieldShell>
-                {errors.travelers && <p className="mt-1 text-xs text-rose-500">{errors.travelers}</p>}
+                {errors.travelers && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.travelers}</p>}
               </div>
             </div>
 
             <div>
-              <label htmlFor="packageName" className="mb-1.5 block text-xs font-semibold text-slate-700">Preferred Package *</label>
+              <label htmlFor="packageName" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Preferred Package *</label>
               <FieldShell icon={BriefcaseBusiness}>
                 <select id="packageName" suppressHydrationWarning value={values.packageName} onChange={(event) => updateValue("packageName", event.target.value)} className={`${inputClassName} ${values.packageName ? "text-slate-800" : "text-slate-400"}`}>
                   {PACKAGE_OPTIONS.map((option) => <option key={option} value={option === PACKAGE_OPTIONS[0] ? "" : option}>{option}</option>)}
                 </select>
               </FieldShell>
-              {errors.packageName && <p className="mt-1 text-xs text-rose-500">{errors.packageName}</p>}
+              {errors.packageName && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.packageName}</p>}
             </div>
 
             <div>
-              <label htmlFor="accommodationType" className="mb-1.5 block text-xs font-semibold text-slate-700">Accommodation Type</label>
+              <label htmlFor="accommodationType" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Accommodation Type</label>
               <FieldShell icon={Hotel}>
                 <select id="accommodationType" suppressHydrationWarning value={values.accommodationType} onChange={(event) => updateValue("accommodationType", event.target.value)} className={`${inputClassName} ${values.accommodationType ? "text-slate-800" : "text-slate-400"}`}>
                   {ACCOMMODATION_OPTIONS.map((option) => <option key={option} value={option === ACCOMMODATION_OPTIONS[0] ? "" : option}>{option}</option>)}
@@ -323,15 +330,15 @@ export function ContactContent() {
             </div>
 
             <div>
-              <label htmlFor="message" className="mb-1.5 block text-xs font-semibold text-slate-700">Special Requirements / Message</label>
-              <textarea id="message" suppressHydrationWarning value={values.message} onChange={(event) => updateValue("message", event.target.value)} placeholder="Tell us about your travel plans, preferences or special requirements..." className="min-h-[90px] w-full resize-y rounded-xl border border-slate-200/90 bg-[#f1f5f9] px-3.5 py-3 text-sm leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 transition-all duration-200 focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100" />
+              <label htmlFor="message" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Special Requirements / Message</label>
+              <textarea id="message" suppressHydrationWarning value={values.message} onChange={(event) => updateValue("message", event.target.value)} placeholder="Tell us about your travel plans, preferences or special requirements..." className="min-h-[90px] w-full resize-y rounded-xl border border-slate-200/90 bg-[#f1f5f9] px-3.5 py-3 text-sm leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 transition-all duration-200 focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 font-sans-custom" />
             </div>
 
-            <button type="submit" disabled={isSaving} suppressHydrationWarning className="mt-1.5 inline-flex min-h-[46px] w-full sm:w-auto sm:self-start items-center justify-center gap-2 rounded-xl bg-sky-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-sky-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer">
+            <button type="submit" disabled={isSaving} suppressHydrationWarning className="mt-1.5 inline-flex min-h-[46px] w-full sm:w-auto sm:self-start items-center justify-center gap-2 rounded-xl bg-sky-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-sky-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer font-sans-custom">
               {isSaving ? "Submitting..." : (<>Request Package Enquiry <ArrowRight className="h-4 w-4" /></>)}
             </button>
-            {submitted && <p role="status" className="rounded-xl border border-emerald-200/60 bg-emerald-50 px-4 py-3 text-center text-xs font-semibold text-emerald-800">Thank you! Our travel specialist will contact you shortly.</p>}
-            {submitError && <p role="alert" className="rounded-xl border border-rose-200/60 bg-rose-50 px-4 py-3 text-center text-xs font-semibold text-rose-800">{submitError}</p>}
+            {submitted && <p role="status" className="rounded-xl border border-emerald-200/60 bg-emerald-50 px-4 py-3 text-center text-xs font-semibold text-emerald-800 font-sans-custom">Thank you! Our travel specialist will contact you shortly.</p>}
+            {submitError && <p role="alert" className="rounded-xl border border-rose-200/60 bg-rose-50 px-4 py-3 text-center text-xs font-semibold text-rose-800 font-sans-custom">{submitError}</p>}
           </form>
         </section>
       </div>
@@ -341,7 +348,7 @@ export function ContactContent() {
 
 export default function ContactPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f6fbfd]">
+    <div className="flex min-h-screen flex-col bg-[#f6fbfd] font-sans-custom">
       <Header />
       <main className="flex-grow">
         <ContactContent />
@@ -351,3 +358,4 @@ export default function ContactPage() {
     </div>
   );
 }
+

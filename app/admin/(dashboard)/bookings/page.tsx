@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChevronDown,
   Eye,
+  FileDown,
   MessageCircle,
   ShieldCheck,
   Trash2,
@@ -63,6 +64,131 @@ const formatWhatsAppUrl = (phone?: string | null, clientName?: string | null): s
   return `https://wa.me/${digits}?text=${text}`;
 };
 
+const generateBookingPdf = (booking: Booking) => {
+  const safe = (v?: string | null) => v?.trim() || "—";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Booking — ${safe(booking.customer_name)}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Lato', sans-serif; color: #0f172a; background: #fff; padding: 40px 48px; font-size: 13px; }
+    .header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #0f766e; padding-bottom: 18px; margin-bottom: 28px; }
+    .brand { display: flex; flex-direction: column; gap: 2px; }
+    .brand-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #0f766e; }
+    .brand-sub { font-size: 11px; color: #64748b; letter-spacing: 0.08em; text-transform: uppercase; }
+    .doc-title { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: #1e293b; text-align: right; }
+    .doc-id { font-size: 10px; color: #94a3b8; text-align: right; margin-top: 4px; }
+    .section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #0f766e; margin-bottom: 12px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .field { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
+    .field-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+    .field-value { font-size: 13px; font-weight: 700; color: #0f172a; word-break: break-word; }
+    .field.full { grid-column: 1 / -1; }
+    .message-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; line-height: 1.7; color: #334155; white-space: pre-wrap; word-break: break-word; }
+    .status-badge { display: inline-block; padding: 4px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .status-approved { background: #ccfbf1; color: #0f766e; }
+    .status-cancelled { background: #fee2e2; color: #b91c1c; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .footer { margin-top: 36px; border-top: 1px solid #e2e8f0; padding-top: 14px; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; }
+    @media print {
+      body { padding: 24px 32px; }
+      @page { margin: 0.5cm; size: A4; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">
+      <div class="brand-name">Lakshadweep Heritage Holidays</div>
+      <div class="brand-sub">Booking Confirmation</div>
+    </div>
+    <div>
+      <div class="doc-title">Booking Summary</div>
+      <div class="doc-id">Ref: ${safe(booking.id).slice(0, 8).toUpperCase()}</div>
+    </div>
+  </div>
+
+  <p class="section-title">Customer Information</p>
+  <div class="grid">
+    <div class="field">
+      <div class="field-label">Customer Name</div>
+      <div class="field-value">${safe(booking.customer_name)}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Phone Number</div>
+      <div class="field-value">${safe(booking.phone)}</div>
+    </div>
+    <div class="field full">
+      <div class="field-label">Email Address</div>
+      <div class="field-value">${safe(booking.email)}</div>
+    </div>
+  </div>
+
+  <p class="section-title">Trip Details</p>
+  <div class="grid">
+    <div class="field full">
+      <div class="field-label">Package</div>
+      <div class="field-value">${safe(booking.package_name)}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Number of Travelers</div>
+      <div class="field-value">${safe(booking.travelers)}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Travel Date</div>
+      <div class="field-value">${formatDate(booking.travel_date)}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Booking Date</div>
+      <div class="field-value">${formatDate(booking.created_at)}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Permit Status</div>
+      <div class="field-value">
+        <span class="status-badge status-${(booking.permit_status ?? 'pending').toLowerCase()}">${safe(booking.permit_status) === '—' ? 'Pending' : safe(booking.permit_status)}</span>
+      </div>
+    </div>
+  </div>
+
+  ${booking.message ? `
+  <p class="section-title">Special Requirements / Message</p>
+  <div class="message-box">${safe(booking.message)}</div>
+  ` : ''}
+
+  <div class="footer">
+    <span>Lakshadweep Heritage Holidays &mdash; Confidential</span>
+    <span>Generated ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+  </div>
+</body>
+</html>`;
+
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:none;";
+  document.body.appendChild(iframe);
+  const doc = iframe.contentWindow?.document;
+  if (!doc) { document.body.removeChild(iframe); return; }
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  // Wait for fonts/resources then print
+  const doPrint = () => {
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+    setTimeout(() => { document.body.removeChild(iframe); }, 1000);
+  };
+  if (iframe.contentDocument?.readyState === "complete") {
+    setTimeout(doPrint, 400);
+  } else {
+    iframe.onload = () => setTimeout(doPrint, 400);
+  }
+};
+
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,6 +197,7 @@ export default function AdminBookingsPage() {
   const [selected, setSelected] = useState<Booking | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pdfingId, setPdfingId] = useState<string | null>(null);
 
   const loadBookings = async () => {
     setIsLoading(true);
@@ -222,6 +349,20 @@ export default function AdminBookingsPage() {
                         </select>
                         <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
                       </div>
+                      <button
+                        onClick={() => {
+                          setPdfingId(booking.id);
+                          generateBookingPdf(booking);
+                          setTimeout(() => setPdfingId(null), 1500);
+                        }}
+                        disabled={pdfingId === booking.id}
+                        aria-label={`Download PDF for ${booking.customer_name ?? "client"}`}
+                        title="Download booking PDF"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 border border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 transition-colors"
+                      >
+                        <FileDown className="h-4.5 w-4.5" strokeWidth={2.2} />
+                        PDF
+                      </button>
                       <button
                         onClick={() => void deleteBooking(booking)}
                         disabled={deletingId === booking.id}

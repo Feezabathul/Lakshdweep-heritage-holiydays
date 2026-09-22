@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
+import { Lato, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const lato = Lato({
+  weight: ["300", "400", "700", "900"],
   variable: "--font-sans-custom",
   subsets: ["latin"],
   display: "swap",
@@ -35,7 +36,7 @@ export default function RootLayout({
       lang="en"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${plusJakarta.variable} ${playfair.variable} h-full antialiased scroll-smooth`}
+      className={`${lato.variable} ${playfair.variable} h-full antialiased scroll-smooth`}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white">
         {children}
