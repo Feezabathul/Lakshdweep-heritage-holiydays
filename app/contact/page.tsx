@@ -87,13 +87,11 @@ function ContactDetail({ icon: Icon, title, value }: { icon: IconType; title: st
   );
 }
 
+type PackageRow = { name: string; duration?: string | null; price: number };
+
 export function ContactContent() {
   const [contactData, setContactData] = useState<ContactContentData>(DEFAULT_CONTACT_CONTENT);
-  const [lowestPackage, setLowestPackage] = useState<{
-    name: string;
-    duration?: string | null;
-    price: number;
-  } | null>(null);
+  const [allPackages, setAllPackages] = useState<PackageRow[]>([]);
   const [isLoadingPackage, setIsLoadingPackage] = useState(true);
   const [values, setValues] = useState<FormValues>(INITIAL_VALUES);
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -108,34 +106,33 @@ export function ContactContent() {
   useEffect(() => {
     const supabase = createClient();
 
-    const fetchLowestPackage = async () => {
+    const fetchPackages = async () => {
       try {
         const { data, error } = await supabase
           .from("packages")
           .select("name, duration, price")
           .gt("price", 0)
-          .order("price", { ascending: true })
-          .limit(1);
+          .order("price", { ascending: true });
 
         if (!error && data && data.length > 0) {
-          setLowestPackage(data[0]);
+          setAllPackages(data as PackageRow[]);
         }
       } catch (err) {
-        console.error("Failed to fetch lowest package:", err);
+        console.warn("Failed to fetch packages for calculator:", err);
       } finally {
         setIsLoadingPackage(false);
       }
     };
 
-    void fetchLowestPackage();
+    void fetchPackages();
 
     const channel = supabase
-      .channel("contact-lowest-package-changes")
+      .channel("contact-package-changes")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "packages" },
         () => {
-          void fetchLowestPackage();
+          void fetchPackages();
         }
       )
       .subscribe();
@@ -223,36 +220,75 @@ export function ContactContent() {
               </h2>
             </div>
 
-            {isLoadingPackage ? (
-              <div className="mt-4 animate-pulse space-y-2.5">
-                <div className="h-4 w-3/4 rounded bg-slate-100" />
-                <div className="h-4 w-1/2 rounded bg-slate-100" />
-                <div className="h-3 w-2/3 rounded bg-slate-100" />
-              </div>
-            ) : lowestPackage ? (
-              <div className="mt-4 space-y-2.5 text-sm text-slate-700 font-sans-custom">
-                <p>
-                  <span className="font-semibold text-slate-900">Selected Package: </span>
-                  <span className="font-medium text-cyan-950">
-                    {lowestPackage.name}
-                    {lowestPackage.duration &&
-                    !lowestPackage.name.toLowerCase().includes(lowestPackage.duration.toLowerCase())
-                      ? ` (${lowestPackage.duration})`
-                      : ""}
-                  </span>
-                </p>
-                <p className="flex items-baseline gap-1">
-                  <span className="font-semibold text-slate-900">Estimated Cost: </span>
-                  <span className="text-base font-bold text-cyan-700 sm:text-lg">
-                    ₹{Number(lowestPackage.price).toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-xs text-slate-500"> / person</span>
-                </p>
-                <p className="border-t border-slate-100 pt-2.5 text-xs text-slate-500">
-                  Includes stay, permits, meals &amp; activities.
-                </p>
-              </div>
-            ) : null}
+            {(() => {
+              const lowestPackage = allPackages[0] ?? null;
+
+              // Map the traveler option string to a numeric count
+              const travelerCount = (() => {
+                if (!values.travelers) return null;
+                if (values.travelers === "1 Person") return 1;
+                if (values.travelers === "2 People") return 2;
+                if (values.travelers === "3-4 People") return 3;
+                if (values.travelers === "5+ People") return 5;
+                return null;
+              })();
+
+              // Find the package whose name matches the form selection
+              const selectedPackage = values.packageName
+                ? allPackages.find((p) =>
+                    p.name.toLowerCase().includes(values.packageName.toLowerCase()) ||
+                    values.packageName.toLowerCase().includes(p.name.toLowerCase())
+                  ) ?? null
+                : null;
+
+              // Decide which package to display and whether to show total or per-person
+              const hasSelection = selectedPackage && travelerCount;
+              const displayPackage = hasSelection ? selectedPackage : lowestPackage;
+              const estimatedTotal = hasSelection
+                ? selectedPackage.price * travelerCount
+                : null;
+
+              if (isLoadingPackage) {
+                return (
+                  <div className="mt-4 animate-pulse space-y-2.5">
+                    <div className="h-4 w-3/4 rounded bg-slate-100" />
+                    <div className="h-4 w-1/2 rounded bg-slate-100" />
+                    <div className="h-3 w-2/3 rounded bg-slate-100" />
+                  </div>
+                );
+              }
+
+              if (!displayPackage) return null;
+
+              return (
+                <div className="mt-4 space-y-2.5 text-sm text-slate-700 font-sans-custom">
+                  <p>
+                    <span className="font-semibold text-slate-900">Selected Package: </span>
+                    <span className="font-medium text-cyan-950">
+                      {displayPackage.name}
+                      {displayPackage.duration &&
+                      !displayPackage.name.toLowerCase().includes(displayPackage.duration.toLowerCase())
+                        ? ` (${displayPackage.duration})`
+                        : ""}
+                    </span>
+                  </p>
+                  <p className="flex items-baseline gap-1">
+                    <span className="font-semibold text-slate-900">Estimated Cost: </span>
+                    <span className="text-base font-bold text-cyan-700 sm:text-lg">
+                      ₹{Number(estimatedTotal ?? displayPackage.price).toLocaleString("en-IN")}
+                    </span>
+                    {estimatedTotal ? (
+                      <span className="text-xs text-slate-500">total ({travelerCount} {travelerCount === 1 ? "person" : "people"})</span>
+                    ) : (
+                      <span className="text-xs text-slate-500">/ person</span>
+                    )}
+                  </p>
+                  <p className="border-t border-slate-100 pt-2.5 text-xs text-slate-500">
+                    Includes stay, permits, meals &amp; activities.
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </section>
 

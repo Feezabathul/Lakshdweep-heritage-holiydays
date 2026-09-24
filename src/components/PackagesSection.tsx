@@ -1,4 +1,5 @@
 import { PACKAGES_DATA, Package } from "@/data/travelData";
+import { unstable_noStore as noStore } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import PackageCard from "./PackageCard";
 
@@ -48,7 +49,10 @@ function toPackage(item: DatabasePackage): Package {
     duration: item.duration || livePackage?.duration || "Flexible duration",
     price: item.price || livePackage?.price || 0,
     image_url: item.image_url || livePackage?.image_url || "/images/kalpeni_island.jpg",
-    description: item.description || livePackage?.description || "A carefully planned Lakshadweep island holiday.",
+    description:
+      item.description ||
+      livePackage?.description ||
+      "A carefully planned Lakshadweep island holiday.",
     inclusions,
     exclusions,
     isPopular: livePackage?.isPopular,
@@ -56,22 +60,36 @@ function toPackage(item: DatabasePackage): Package {
 }
 
 async function getPackages(): Promise<Package[]> {
+  noStore();
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("packages")
-      .select("id, name, description, duration, price, image_url, inclusions, exclusions")
+      .select(
+        "id, name, description, duration, price, image_url, inclusions, exclusions"
+      )
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Supabase packages fetch error:", error.message);
+      // Log as warning so it doesn't appear as a hard crash in the console
+      console.warn(
+        "Supabase packages fetch error (falling back to static data):",
+        error.message
+      );
+      return PACKAGES_DATA;
     }
 
-    if (!error && data && data.length > 0) {
+    if (data && data.length > 0) {
       return (data as DatabasePackage[]).map(toPackage);
     }
   } catch (err) {
-    console.error("Error fetching packages:", err);
+    // Network-level failure (e.g. "fetch failed") — silently use static data
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "Supabase unreachable, using static package data:",
+        err instanceof Error ? err.message : err
+      );
+    }
   }
 
   return PACKAGES_DATA;
