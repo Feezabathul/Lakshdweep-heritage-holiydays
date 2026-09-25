@@ -1,0 +1,376 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  Calculator,
+  CalendarDays,
+  Clock3,
+  Hotel,
+  Mail,
+  MapPin,
+  Phone,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { ContactContentData, DEFAULT_CONTACT_CONTENT, getContactContent } from "@/lib/content";
+
+const PACKAGE_OPTIONS = [
+  "Select a package...",
+  "Kalpeni Island Adventure Package (3N / 4D)",
+  "Agatti Island Adventure Package (3N / 4D)",
+  "Honeymoon in Paradise.(Agatti/ Kavaratti/ Kalpeni) (3N / 4D)",
+  "Family Island Holiday(Agatti/ Kavaratti/Kalpeni). (3N / 4D)",
+];
+
+const ACCOMMODATION_OPTIONS = [
+  "Select accommodation type...",
+  "Homestay",
+  "Resort",
+  "Standard Rooms",
+];
+
+const TRAVELER_OPTIONS = ["1 Person", "2 People", "3-4 People", "5+ People"];
+
+type FormValues = {
+  name: string;
+  phone: string;
+  email: string;
+  travelDate: string;
+  travelers: string;
+  packageName: string;
+  accommodationType: string;
+  message: string;
+};
+
+const INITIAL_VALUES: FormValues = {
+  name: "",
+  phone: "",
+  email: "",
+  travelDate: "",
+  travelers: "",
+  packageName: "",
+  accommodationType: "",
+  message: "",
+};
+
+type IconType = typeof UserRound;
+
+function FieldShell({ icon: Icon, children }: { icon: IconType; children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-[46px] items-center gap-3 rounded-xl border border-slate-200/90 bg-[#f1f5f9] px-3.5 transition-all duration-200 focus-within:border-sky-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-sky-100 font-sans-custom">
+      <Icon className="h-4 w-4 shrink-0 text-slate-400 transition-colors" strokeWidth={2} />
+      {children}
+    </div>
+  );
+}
+
+function ContactDetail({ icon: Icon, title, value }: { icon: IconType; title: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-cyan-600">
+        <Icon className="h-4 w-4" strokeWidth={2.5} />
+      </div>
+      <div className="pt-0.5">
+        <h2 className="text-sm font-bold text-cyan-950 sm:text-base font-serif-custom">{title}</h2>
+        <p className="mt-0.5 text-xs leading-relaxed text-slate-600 sm:text-sm font-sans-custom">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+type PackageRow = { name: string; duration?: string | null; price: number };
+
+export function ContactContent() {
+  const [contactData, setContactData] = useState<ContactContentData>(DEFAULT_CONTACT_CONTENT);
+  const [allPackages, setAllPackages] = useState<PackageRow[]>([]);
+  const [isLoadingPackage, setIsLoadingPackage] = useState(true);
+  const [values, setValues] = useState<FormValues>(INITIAL_VALUES);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    void getContactContent().then(setContactData);
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const fetchPackages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("packages")
+          .select("name, duration, price")
+          .gt("price", 0)
+          .order("price", { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          setAllPackages(data as PackageRow[]);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch packages for calculator:", err);
+      } finally {
+        setIsLoadingPackage(false);
+      }
+    };
+
+    void fetchPackages();
+
+    const channel = supabase
+      .channel("contact-package-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "packages" },
+        () => {
+          void fetchPackages();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const updateValue = (field: keyof FormValues, value: string) => {
+    setValues((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
+    setSubmitted(false);
+  };
+
+  const validate = () => {
+    const nextErrors: Partial<Record<keyof FormValues, string>> = {};
+    if (!values.name.trim()) nextErrors.name = "Please enter your full name.";
+    if (!/^\+?[0-9\s()-]{10,}$/.test(values.phone.trim())) nextErrors.phone = "Enter a valid phone number.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) nextErrors.email = "Enter a valid email address.";
+    if (!values.travelDate) nextErrors.travelDate = "Choose your preferred travel date.";
+    if (!values.travelers) nextErrors.travelers = "Select the number of travelers.";
+    if (!values.packageName) nextErrors.packageName = "Select a preferred package.";
+    return nextErrors;
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const nextErrors = validate();
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setIsSaving(true);
+    setSubmitError("");
+    const supabase = createClient();
+    const { error } = await supabase.from("bookings").insert({
+      customer_name: values.name.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      travel_date: values.travelDate || null,
+      travelers: values.travelers,
+      package_name: values.packageName,
+      accommodation_type: values.accommodationType,
+      message: values.message.trim(),
+      permit_status: "Pending",
+      status: "Pending",
+    });
+
+    if (error) {
+      setSubmitError("Sorry, we could not submit your enquiry. Please try again or contact us directly.");
+    } else {
+      setSubmitted(true);
+      setValues(INITIAL_VALUES);
+    }
+    setIsSaving(false);
+  };
+
+  const inputClassName =
+    "min-w-0 flex-1 border-0 bg-transparent py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 font-normal font-sans-custom";
+
+  return (
+    <section id="contact" className="bg-[#f6fbfd] px-4 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-24 font-sans-custom">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.97fr)_minmax(520px,1.03fr)] lg:items-start lg:gap-12">
+        <section className="pt-1 lg:pt-4">
+          <span className="inline-flex rounded-full bg-cyan-50 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-cyan-500 font-sans-custom">
+            Start Planning
+          </span>
+          <h1 className="mt-3 max-w-xl text-3xl font-bold leading-[1.1] tracking-tight text-cyan-950 sm:text-4xl lg:text-[2.5rem] font-serif-custom">
+            Ready for Your Lakshadweep Escape?
+          </h1>
+
+          <div className="mt-6 flex flex-col gap-4 sm:mt-8 sm:gap-5">
+            <ContactDetail icon={MapPin} title="Head Office" value={contactData.address || DEFAULT_CONTACT_CONTENT.address} />
+            <ContactDetail icon={Phone} title="Direct Phone & WhatsApp" value={`${contactData.phone || DEFAULT_CONTACT_CONTENT.phone} / WhatsApp: ${contactData.whatsapp || DEFAULT_CONTACT_CONTENT.whatsapp}`} />
+            <ContactDetail icon={Mail} title="Email Support" value={contactData.email || DEFAULT_CONTACT_CONTENT.email} />
+            <ContactDetail icon={Clock3} title="Business Hours" value={contactData.businessHours || DEFAULT_CONTACT_CONTENT.businessHours} />
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-sky-100 bg-white p-5 shadow-[0_4px_20px_rgba(8,58,90,0.05)] sm:mt-8 sm:p-6">
+            <div className="flex items-center gap-2.5 border-b border-sky-100 pb-3.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+                <Calculator className="h-4 w-4" strokeWidth={2.5} />
+              </div>
+              <h2 className="text-base font-bold text-cyan-950 sm:text-lg font-serif-custom">
+                Estimated Trip Calculator
+              </h2>
+            </div>
+
+            {(() => {
+              const lowestPackage = allPackages[0] ?? null;
+
+              const travelerCount = (() => {
+                if (!values.travelers) return null;
+                if (values.travelers === "1 Person") return 1;
+                if (values.travelers === "2 People") return 2;
+                if (values.travelers === "3-4 People") return 3;
+                if (values.travelers === "5+ People") return 5;
+                return null;
+              })();
+
+              const selectedPackage = values.packageName
+                ? allPackages.find(
+                    (p) =>
+                      p.name.toLowerCase().includes(values.packageName.toLowerCase()) ||
+                      values.packageName.toLowerCase().includes(p.name.toLowerCase())
+                  ) ?? null
+                : null;
+
+              const hasSelection = selectedPackage && travelerCount;
+              const displayPackage = hasSelection ? selectedPackage : lowestPackage;
+              const estimatedTotal = hasSelection ? selectedPackage.price * travelerCount : null;
+
+              if (isLoadingPackage) {
+                return (
+                  <div className="mt-4 animate-pulse space-y-2.5">
+                    <div className="h-4 w-3/4 rounded bg-slate-100" />
+                    <div className="h-4 w-1/2 rounded bg-slate-100" />
+                    <div className="h-3 w-2/3 rounded bg-slate-100" />
+                  </div>
+                );
+              }
+
+              if (!displayPackage) return null;
+
+              return (
+                <div className="mt-4 space-y-2.5 text-sm text-slate-700 font-sans-custom">
+                  <p>
+                    <span className="font-semibold text-slate-900">Selected Package: </span>
+                    <span className="font-medium text-cyan-950">
+                      {displayPackage.name}
+                      {displayPackage.duration &&
+                      !displayPackage.name.toLowerCase().includes(displayPackage.duration.toLowerCase())
+                        ? ` (${displayPackage.duration})`
+                        : ""}
+                    </span>
+                  </p>
+                  <p className="flex items-baseline gap-1">
+                    <span className="font-semibold text-slate-900">Estimated Cost: </span>
+                    <span className="text-base font-bold text-cyan-700 sm:text-lg">
+                      ₹{Number(estimatedTotal ?? displayPackage.price).toLocaleString("en-IN")}
+                    </span>
+                    {estimatedTotal ? (
+                      <span className="text-xs text-slate-500">
+                        total ({travelerCount} {travelerCount === 1 ? "person" : "people"})
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-500">/ person</span>
+                    )}
+                  </p>
+                  <p className="border-t border-slate-100 pt-2.5 text-xs text-slate-500">
+                    Includes stay, permits, meals &amp; activities.
+                  </p>
+                </div>
+              );
+            })()}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 lg:p-9 shadow-sm">
+          <h2 className="text-2xl sm:text-[1.75rem] font-bold tracking-tight text-slate-900 font-serif-custom">
+            Book Your Package Enquiry
+          </h2>
+          <p className="mt-1.5 text-sm text-slate-500 font-sans-custom">
+            Get instant callback &amp; entry permit details
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate suppressHydrationWarning className="mt-6 flex flex-col gap-4 sm:gap-4.5">
+            <div>
+              <label htmlFor="contact-name" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Full Name *</label>
+              <FieldShell icon={UserRound}>
+                <input id="contact-name" suppressHydrationWarning placeholder="Enter your name" value={values.name} onChange={(e) => updateValue("name", e.target.value)} className={inputClassName} />
+              </FieldShell>
+              {errors.name && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.name}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="contact-phone" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Phone Number (WhatsApp) *</label>
+                <FieldShell icon={Phone}>
+                  <input id="contact-phone" suppressHydrationWarning type="tel" placeholder="Enter your number" value={values.phone} onChange={(e) => updateValue("phone", e.target.value)} className={inputClassName} />
+                </FieldShell>
+                {errors.phone && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.phone}</p>}
+              </div>
+              <div>
+                <label htmlFor="contact-email" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Email Address *</label>
+                <FieldShell icon={Mail}>
+                  <input id="contact-email" suppressHydrationWarning type="email" placeholder="Enter your email" value={values.email} onChange={(e) => updateValue("email", e.target.value)} className={inputClassName} />
+                </FieldShell>
+                {errors.email && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.email}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="contact-travelDate" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Preferred Travel Date *</label>
+                <FieldShell icon={CalendarDays}>
+                  <input id="contact-travelDate" suppressHydrationWarning type="date" value={values.travelDate} onChange={(e) => updateValue("travelDate", e.target.value)} className={`${inputClassName} ${values.travelDate ? "text-slate-800" : "text-slate-400"}`} />
+                </FieldShell>
+                {errors.travelDate && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.travelDate}</p>}
+              </div>
+              <div>
+                <label htmlFor="contact-travelers" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Number of Travelers *</label>
+                <FieldShell icon={UsersRound}>
+                  <select id="contact-travelers" suppressHydrationWarning value={values.travelers} onChange={(e) => updateValue("travelers", e.target.value)} className={`${inputClassName} ${values.travelers ? "text-slate-800" : "text-slate-400"}`}>
+                    <option value="">Select travelers</option>
+                    {TRAVELER_OPTIONS.map((option) => <option key={option}>{option}</option>)}
+                  </select>
+                </FieldShell>
+                {errors.travelers && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.travelers}</p>}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="contact-packageName" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Preferred Package *</label>
+              <FieldShell icon={BriefcaseBusiness}>
+                <select id="contact-packageName" suppressHydrationWarning value={values.packageName} onChange={(e) => updateValue("packageName", e.target.value)} className={`${inputClassName} ${values.packageName ? "text-slate-800" : "text-slate-400"}`}>
+                  {PACKAGE_OPTIONS.map((option) => <option key={option} value={option === PACKAGE_OPTIONS[0] ? "" : option}>{option}</option>)}
+                </select>
+              </FieldShell>
+              {errors.packageName && <p className="mt-1 text-xs text-rose-500 font-sans-custom">{errors.packageName}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="contact-accommodationType" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Accommodation Type</label>
+              <FieldShell icon={Hotel}>
+                <select id="contact-accommodationType" suppressHydrationWarning value={values.accommodationType} onChange={(e) => updateValue("accommodationType", e.target.value)} className={`${inputClassName} ${values.accommodationType ? "text-slate-800" : "text-slate-400"}`}>
+                  {ACCOMMODATION_OPTIONS.map((option) => <option key={option} value={option === ACCOMMODATION_OPTIONS[0] ? "" : option}>{option}</option>)}
+                </select>
+              </FieldShell>
+            </div>
+
+            <div>
+              <label htmlFor="contact-message" className="mb-1.5 block text-xs font-semibold text-slate-700 font-sans-custom">Special Requirements / Message</label>
+              <textarea id="contact-message" suppressHydrationWarning value={values.message} onChange={(e) => updateValue("message", e.target.value)} placeholder="Tell us about your travel plans, preferences or special requirements..." className="min-h-[90px] w-full resize-y rounded-xl border border-slate-200/90 bg-[#f1f5f9] px-3.5 py-3 text-sm leading-relaxed text-slate-800 outline-none placeholder:text-slate-400 transition-all duration-200 focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100 font-sans-custom" />
+            </div>
+
+            <button type="submit" disabled={isSaving} suppressHydrationWarning className="mt-1.5 inline-flex min-h-[46px] w-full sm:w-auto sm:self-start items-center justify-center gap-2 rounded-xl bg-sky-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-sky-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer font-sans-custom">
+              {isSaving ? "Submitting..." : (<>Request Package Enquiry <ArrowRight className="h-4 w-4" /></>)}
+            </button>
+            {submitted && <p role="status" className="rounded-xl border border-emerald-200/60 bg-emerald-50 px-4 py-3 text-center text-xs font-semibold text-emerald-800 font-sans-custom">Thank you! Our travel specialist will contact you shortly.</p>}
+            {submitError && <p role="alert" className="rounded-xl border border-rose-200/60 bg-rose-50 px-4 py-3 text-center text-xs font-semibold text-rose-800 font-sans-custom">{submitError}</p>}
+          </form>
+        </section>
+      </div>
+    </section>
+  );
+}

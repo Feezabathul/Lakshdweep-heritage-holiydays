@@ -6,7 +6,7 @@ import WhyChooseUs from "@/components/WhyChooseUs";
 import ExperiencesSection from "@/components/ExperiencesSection";
 import AboutSection from "@/components/AboutSection";
 import FAQSection from "@/components/FAQSection";
-import { ContactContent } from "./contact/page";
+import { ContactContent } from "@/components/ContactContent";
 
 
 import Footer from "@/components/Footer";

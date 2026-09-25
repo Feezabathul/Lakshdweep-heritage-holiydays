@@ -35,7 +35,7 @@ export default function FinalCTA() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
           <Link
-            href="/#planner"
+            href="/#contact"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold px-9 py-4 rounded-full text-base shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/50 transition-all transform hover:-translate-y-0.5"
           >
             <PhoneCall className="w-5 h-5 text-amber-200" />

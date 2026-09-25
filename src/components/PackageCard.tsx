@@ -152,7 +152,8 @@ export default function PackageCard({ pkg }: PackageCardProps) {
               Close
             </button>
             <Link
-              href="/contact"
+              href="/#contact"
+              onClick={() => setIsModalOpen(false)}
               className="w-full sm:w-auto rounded-full bg-sky-700 px-5 py-3 text-center text-base sm:text-lg font-bold text-white shadow-md hover:bg-sky-800 transition-colors"
             >
               Book This Package

@@ -36,9 +36,9 @@ export default function RootLayout({
       lang="en"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
-      className={`${lato.variable} ${playfair.variable} h-full antialiased scroll-smooth`}
+      className={`${lato.variable} ${playfair.variable} antialiased scroll-smooth`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white">
+      <body suppressHydrationWarning className="min-h-screen flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white">
         {children}
       </body>
     </html>
